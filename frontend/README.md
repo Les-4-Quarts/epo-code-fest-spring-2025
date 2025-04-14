@@ -37,3 +37,9 @@ npm run build
 ```sh
 npm run lint
 ```
+
+### Launch the Storybook
+
+```sh
+npm run storybook
+```
