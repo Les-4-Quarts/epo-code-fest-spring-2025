@@ -9,7 +9,7 @@
   --warning-color: #ff7f07;
   --danger-color: #dc3545;
   --light-color: #dbd8cf;
-  --dark-color: #343a40;
+  --dark-color: #1c1917;
 
   --primary-text-color: #212529;
   --secondary-text-color: #ffffff;
@@ -20,4 +20,9 @@
 body {
   color: var(--primary-text-color);
   background-color: var(--light-color);
+}
+
+body.dark {
+  color: var(--secondary-text-color);
+  background-color: var(--dark-color);
 }

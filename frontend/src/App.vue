@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import { ref } from 'vue'
+import SidePannel from './components/SidePannel.vue'
+
+import { useThemeStore } from './stores/themeStore'
+const themeStore = useThemeStore()
 
 const componentKey = ref(Date.now())
 </script>
 
 <template>
-  <div class="container">
-    <Header class="header" />
+  <div :class="['container', { dark: themeStore.isDarkTheme }]">
     <div class="page">
+      <SidePannel is-open />
       <main>
         <RouterView :key="componentKey" />
       </main>
@@ -24,21 +27,22 @@ const componentKey = ref(Date.now())
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
 
-.header {
-  position: fixed;
-  width: 100%;
+  &.dark {
+    color: var(--secondary-text-color);
+    background-color: var(--dark-color);
+  }
 }
 
 .page {
-  margin-top: 79px;
   display: flex;
+  flex-direction: row;
   flex: 1;
 
   main {
     display: flex;
     flex: 1;
+    margin-left: 300px;
   }
 }
 </style>
