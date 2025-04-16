@@ -7,6 +7,16 @@ import { mdiWeatherSunny, mdiWeatherNight } from '@mdi/js'
 import { useThemeStore } from '@/stores/themeStore'
 const themeStore = useThemeStore()
 
+// Locales
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
+
+function changeLanguage(event: Event) {
+  const selectedLanguage = (event.target as HTMLSelectElement).value
+  locale.value = selectedLanguage
+}
+
+// Props
 defineProps({
   isOpen: Boolean,
 })
@@ -19,6 +29,11 @@ defineProps({
     </div>
     <div class="content"></div>
     <div class="footer">
+      <select class="language-selector" @change="changeLanguage">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+      </select>
       <SvgIcon
         class="theme-icon"
         :path="themeStore.isDarkTheme ? mdiWeatherSunny : mdiWeatherNight"
@@ -72,6 +87,16 @@ defineProps({
     .theme-icon {
       cursor: pointer;
       margin-left: auto;
+    }
+
+    .language-selector {
+      margin-left: 10px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #000;
+      font-size: 14px;
     }
   }
 }

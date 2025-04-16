@@ -1,16 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+//Locales
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+</script>
 
 <template>
   <div class="home">
-    <h1>Welcome to Your Vue.js App</h1>
-    <p>
-      To get started, edit <code>src/views/HomeView.vue</code> and save to test hot module
-      replacement.
-    </p>
-    <p>
-      For more information, check out the documentation at
-      <a href="https://vuejs.org/guide/introduction.html" target="_blank">Vue.js Guide</a>.
-    </p>
+    <h1>{{ $t('home.welcome') }}</h1>
   </div>
 </template>
 
