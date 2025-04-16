@@ -1,27 +1,50 @@
 import BasicChip from "./BasicChip.vue";
-import type { Meta, StoryFn } from "@storybook/vue3";
+import type { Meta, StoryObj } from "@storybook/vue3";
 
 export default {
     title: "Components/Chips/BasicChip",
     component: BasicChip,
     argTypes: {
-        title: { control: "text", description: "Le texte affiché dans la puce." },
-        color: { control: "color", description: "La couleur du texte de la puce." },
-        bgColor: { control: "color", description: "La couleur d'arrière-plan de la puce." },
+        title: { control: "text", description: "The title of the chip" },
+        color: { control: "color", description: "The text color of the chip" },
+        bgColor: { control: "color", description: "The background color of the chip" },
+    },
+    parameters: {
+        backgrounds: {
+            default: "light",
+        },
     },
 } as Meta<typeof BasicChip>;
 
-const Template: StoryFn<typeof BasicChip> = (args) => ({
-    components: { BasicChip },
-    setup() {
-        return { args };
-    },
-    template: '<BasicChip v-bind="args" />',
-});
+type Story = StoryObj<typeof BasicChip>;
 
-export const Default = Template.bind({});
-Default.args = {
-    title: "Chip example",
-    color: "#ffffff",
-    bgColor: "#007bff",
+export const Default: Story = {
+    args: {
+        title: "Default Chip",
+    },
+};
+
+export const DarkDefault: Story = {
+    args: {
+        title: "Dark Default Chip",
+    },
+    parameters: {
+        backgrounds: {
+            default: "dark",
+        },
+    },
+    decorators: [
+        (story) => ({
+            components: { story },
+            template: `<div class="dark"><story /></div>`,
+        }),
+    ]
+};
+
+export const CustomColor: Story = {
+    args: {
+        title: "Custom Color Chip",
+        color: "#FFFFFF",
+        bgColor: "#FF5733",
+    },
 };

@@ -22,5 +22,10 @@ defineProps({
   font-size: 14px;
   color: #fff; /* Default text color */
   background-color: var(--primary-color); /* Default color */
+
+  .dark & {
+    color: #fff; /* Dark mode text color */
+    background-color: var(--secondary-dark-color); /* Dark mode background color */
+  }
 }
 </style>
