@@ -1,30 +1,50 @@
 <script setup lang="ts">
 // Components
+import { ref, onMounted, watch } from 'vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 
-defineProps({
+const props = defineProps({
   title: String,
   color: {
     type: String,
     required: false,
-    default: 'var(--primary-color)',
+    default: 'var(--primary-text-color)',
   },
   bgColor: {
     type: String,
     required: false,
-    default: 'var(--secondary-color)',
+    default: 'cream',
   },
   icon: {
     type: String,
     required: false,
-    default: 'fas fa-box-open',
+    default: 'mdiHome',
   },
 })
+
+const iconPath = ref<string | null>(null)
+
+const loadIcon = async (iconName: string) => {
+  try {
+    const module = (await import('@mdi/js')) as unknown as Record<string, string>
+    iconPath.value = module[iconName]
+  } catch (error) {
+    console.error(`Failed to load icon: ${iconName}`, error)
+    iconPath.value = null
+  }
+}
+
+// Load the icon when the component is mounted or when the icon prop changes
+onMounted(() => loadIcon(props.icon))
+watch(
+  () => props.icon,
+  (newIcon) => loadIcon(newIcon),
+)
 </script>
 
 <template>
   <div class="basic-box" :style="{ color, backgroundColor: bgColor, borderColor: color }">
-    <svg-icon type="mdi" :path="icon" />
+    <svg-icon v-if="iconPath" type="mdi" :path="iconPath" />
     <div class="body">
       <h2>{{ title }}</h2>
       <slot></slot>

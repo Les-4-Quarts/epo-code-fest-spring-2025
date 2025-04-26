@@ -37,6 +37,7 @@ defineProps({
     <slot></slot>
     <div class="button-container">
       <BasicButton
+        v-if="buttonText"
         :text="buttonText"
         :class="['button']"
         :is-loading="isLoading"

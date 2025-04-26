@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import SvgIcon from '@jamescoyle/vue-icon'
 import SpinnerLoader from '../Loaders/SpinnerLoader.vue'
+import { useRouter } from 'vue-router'
+import { onMounted, ref, watch } from 'vue'
 
-defineProps({
+// Props
+const props = defineProps({
   text: String,
-  color: String,
-  bgColor: String,
+  color: {
+    type: String,
+    default: 'black',
+  },
+  bgColor: {
+    type: String,
+    default: 'transparent',
+  },
   icon: {
     type: String,
     required: false,
@@ -13,6 +22,18 @@ defineProps({
   iconSize: {
     type: Number,
     default: 24,
+  },
+  activeColor: {
+    type: String,
+    default: 'var(--secondary-text-color)',
+  },
+  activeBgColor: {
+    type: String,
+    default: 'var(--primary-color)',
+  },
+  isActive: {
+    type: Boolean,
+    default: false,
   },
   isLoading: {
     type: Boolean,
@@ -22,39 +43,78 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  to: {
+    type: String,
+    required: false,
+  },
 })
 
+// Router
+const router = useRouter()
+
+// Emits
 const emit = defineEmits(['click'])
 
+// Methods
 const onClick = () => {
-  emit('click')
+  if (props.to) {
+    router.push(props.to)
+  } else {
+    emit('click')
+  }
 }
+
+//#region :    --- Icon
+
+const iconPath = ref<string | undefined>(undefined)
+
+const loadIcon = async (iconName: undefined | string) => {
+  if (!iconName) {
+    iconPath.value = undefined
+    return
+  }
+
+  try {
+    const module = (await import('@mdi/js')) as unknown as Record<string, string>
+    iconPath.value = module[iconName]
+  } catch (error) {
+    console.error(`Failed to load icon: ${iconName}`, error)
+    iconPath.value = undefined
+  }
+}
+
+// Load the icon when the component is mounted or when the icon prop changes
+onMounted(() => loadIcon(props.icon))
+watch(
+  () => props.icon,
+  (newIcon) => loadIcon(newIcon),
+)
+
+//#endregion : --- Icon
 </script>
 
 <template>
   <button
-    v-if="isLoading"
-    :disabled="isLoading"
-    class="button"
-    :style="{ color: color, backgroundColor: bgColor }"
-  >
-    <SpinnerLoader class="loader" :color="color" :size="1" />
-  </button>
-  <button
-    v-else
     @click="onClick"
+    :disabled="isLoading || disabled"
     :class="['button', { disabled: disabled }]"
-    :style="{ color: color, backgroundColor: bgColor }"
+    :style="{
+      color: isActive ? activeColor : color,
+      backgroundColor: isActive ? activeBgColor : bgColor,
+    }"
   >
-    <SvgIcon
-      v-if="icon"
-      type="mdi"
-      :path="icon"
-      :size="iconSize"
-      :style="{ color: color }"
-      class="icon"
-    />
-    {{ text }}
+    <SpinnerLoader v-if="isLoading" class="loader" :color="color" :size="1" />
+    <template v-else>
+      <SvgIcon
+        v-if="icon"
+        type="mdi"
+        :path="iconPath"
+        :size="iconSize"
+        :style="{ color: color }"
+        :class="['icon', { 'icon-with-text': text }]"
+      />
+      <span>{{ text }}</span></template
+    >
   </button>
 </template>
 
@@ -70,8 +130,13 @@ button {
   font-weight: bold;
 
   .icon {
-    margin-left: -5px;
-    margin-right: 5px;
+    // margin-left: -5px;
+    // margin-right: 5px;
+
+    &.icon-with-text {
+      margin-left: -5px;
+      margin-right: 5px;
+    }
   }
 
   &.disabled {

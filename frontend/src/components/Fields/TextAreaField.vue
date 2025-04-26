@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiPencil, mdiSend } from '@mdi/js'
 import { ref, onMounted } from 'vue'
 
 defineProps({
