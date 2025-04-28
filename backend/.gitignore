@@ -19,3 +19,6 @@
 # /poetry.toml
 
 .env
+
+# Large files
+/notebooks/outputs/patents_20230104.json
