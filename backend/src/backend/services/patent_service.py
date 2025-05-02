@@ -1,0 +1,65 @@
+from backend.repositories import patent_repository
+from backend.models.Patent import Patent, FullPatent
+from backend.config.logging_config import logger
+
+
+def create_patent(patent: Patent):
+    """
+    Create a new patent in the database.
+
+    Args:
+        patent (Patent): The patent object to be created.
+
+    Returns:
+        None
+    """
+    logger.debug(f"Creating patent: {patent.number}")
+
+    # Call the repository function to create the patent
+    patent_repository.create_patent(patent.model_dump())
+    logger.info(f"Patent {patent.number} created successfully.")
+
+
+def get_patent_by_number(patent_number: str) -> Patent:
+    """
+    Retrieve a patent by its number.
+
+    Args:
+        patent_number (str): The patent number to search for.
+
+    Returns:
+        Patent: The patent object if found, None otherwise.
+    """
+    logger.debug(f"Retrieving patent by number: {patent_number}")
+
+    # Call the repository function to get the patent
+    patent_data = patent_repository.get_patent(patent_number)
+
+    if patent_data:
+        return Patent(**patent_data)
+
+    logger.warning(f"Patent {patent_number} not found.")
+    return None
+
+
+def get_full_patent_by_number(patent_number: str) -> FullPatent:
+    """
+    Retrieve a full patent by its number, including claims and descriptions.
+
+    Args:
+        patent_number (str): The patent number to search for.
+
+    Returns:
+        FullPatent: The full patent object if found, None otherwise.
+    """
+    logger.debug(f"Retrieving full patent by number: {patent_number}")
+
+    # Call the repository function to get the full patent
+    full_patent_data = patent_repository.get_full_patent(
+        patent_number)
+
+    if full_patent_data:
+        return FullPatent(**full_patent_data)
+
+    logger.warning(f"Full patent {patent_number} not found.")
+    return None

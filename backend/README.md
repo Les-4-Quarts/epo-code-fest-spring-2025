@@ -20,7 +20,14 @@ poetry --version
 poetry install
 ```
 
-3. RUn the application:
+3. Init the database:
+
+:warning: This will drop all existing data in the database. :warning:
+```bash
+poetry run python3 -m src.backend.init_db
+```
+
+1. Run the application:
 ```bash
 poetry run start # For production
 poetry run dev   # For development
