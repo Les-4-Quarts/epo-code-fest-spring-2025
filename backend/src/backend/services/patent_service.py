@@ -65,6 +65,25 @@ def get_full_patent_by_number(patent_number: str) -> FullPatent:
     return None
 
 
+def get_all_patents() -> list[Patent]:
+    """
+    Retrieve all patents from the database.
+
+    Returns:
+        list[Patent]: A list of patent objects.
+    """
+    logger.debug("Retrieving all patents.")
+
+    # Call the repository function to get all patents
+    patents_data = patent_repository.get_all_patents()
+
+    if patents_data:
+        return [Patent(**patent) for patent in patents_data]
+
+    logger.warning("No patents found.")
+    return []
+
+
 def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
     """
     Get all patents by applicant name.

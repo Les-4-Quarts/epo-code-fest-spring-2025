@@ -10,6 +10,26 @@ router = APIRouter(
 )
 
 
+@router.get("/", response_model=list[Patent])
+async def get_all_patents() -> list[Patent]:
+    """
+    Get all patents in the database.
+
+    Returns:
+        list[Patent]: A list of all patent objects.
+    """
+    logger.debug("Retrieving all patents.")
+
+    # Call the service function to get all patents
+    patents = patent_service.get_all_patents()
+
+    if not patents:
+        logger.warning("No patents found.")
+        raise HTTPException(status_code=404, detail="No patents found.")
+
+    return patents
+
+
 @router.get("/{patent_number}", response_model=Patent)
 async def get_patent_by_number(patent_number: str) -> Patent:
     """

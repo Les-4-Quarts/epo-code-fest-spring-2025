@@ -274,6 +274,68 @@ def get_full_patent(number: str) -> dict:
     return patent
 
 
+def get_all_patents() -> list:
+    """
+    Get all patents from the PostgreSQL database.
+
+    Returns:
+        list: A list of dictionaries containing patent data.
+    """
+    # TODO: Apply pagination to this function
+    logger.debug("Fetching all patents")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the patent data from the database
+    fetch_patent_query = """
+    SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date 
+    FROM patent;
+    """
+
+    cursor.execute(fetch_patent_query)
+    results = cursor.fetchall()
+    cursor.close()
+
+    patents = []
+    for result in results:
+        patents.append({
+            "number": result[0],
+            "en_title": result[1],
+            "fr_title": result[2],
+            "de_title": result[3],
+            "en_abstract": result[4],
+            "fr_abstract": result[5],
+            "de_abstract": result[6],
+            "country": result[7],
+            "publication_date": result[8],
+            "applicants": [],
+        })
+
+        # Fetch the applicants for each patent
+        fetch_applicants_query = """
+        SELECT applicant_name, patent_number
+        FROM patent_applicant
+        WHERE patent_number = %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(fetch_applicants_query, (result[0],))
+        applicants = cursor.fetchall()
+        for applicant in applicants:
+            patents[-1]["applicants"].append({
+                "name": applicant[0],
+                "patent_number": applicant[1]
+            })
+        cursor.close()
+
+    # Close the database connection
+    conn.close()
+
+    logger.debug("All patents fetched successfully")
+
+    return patents
+
+
 def get_all_patents_by_applicant(applicant_name: str) -> list:
     """
     Get all patents by applicant name from the PostgreSQL database.
