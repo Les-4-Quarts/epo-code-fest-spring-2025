@@ -89,6 +89,23 @@ def create_patent(patent: dict):
 
     conn.commit()
     cursor.close()
+
+    # Insert applicants into the patent_applicant table
+    for applicant in patent["applicants"]:
+        insert_applicant_query = """
+        INSERT INTO patent_applicant (applicant_name, patent_number)
+        VALUES (%s, %s)
+        ON CONFLICT (applicant_name) DO NOTHING;
+        """
+
+        cursor.execute(insert_applicant_query, (
+            applicant["name"],
+            patent["number"]
+        ))
+    conn.commit()
+    cursor.close()
+
+    # Close the database connection
     conn.close()
 
     logger.debug(
@@ -178,7 +195,8 @@ def get_full_patent(number: str) -> dict:
         "country": result[7],
         "publication_date": result[8],
         "description": [],
-        "claims": []
+        "claims": [],
+        "applicants": []
     }
 
     cursor.close()
@@ -214,6 +232,22 @@ def get_full_patent(number: str) -> dict:
             "description_number": description[0],
             "description_text": description[1],
             "patent_number": description[2]
+        })
+    cursor.close()
+
+    # Fetch the applicants from the database
+    fetch_applicants_query = """
+    SELECT applicant_name, patent_number
+    FROM patent_applicant
+    WHERE patent_number = %s;
+    """
+    cursor = conn.cursor()
+    cursor.execute(fetch_applicants_query, (number,))
+    applicants = cursor.fetchall()
+    for applicant in applicants:
+        patent["applicants"].append({
+            "name": applicant[0],
+            "patent_number": applicant[1]
         })
     cursor.close()
 

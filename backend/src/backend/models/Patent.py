@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from backend.models.Claim import Claim
 from backend.models.Description import Description
+from backend.models.Applicant import Applicant
 
 
 class Patent(BaseModel):
@@ -31,6 +32,8 @@ class FullPatent(Patent):
         [], title="Descriptions", description="The descriptions of the patent.")
     claims: List[Claim] = Field(
         [], title="Claims", description="The claims of the patent.")
+    applicants: List[Applicant] = Field(
+        [], title="Applicants", description="The applicants of the patent.")
 
     model_config = {
         "json_schema_extra": {
@@ -57,6 +60,12 @@ class FullPatent(Patent):
                             "claim_number": 1,
                             "patent_number": "EP0000000",
                             "claim_text": "[0001] A method for processing data."
+                        }
+                    ],
+                    "applicants": [
+                        {
+                            "name": "John Doe",
+                            "patent_number": "EP0000000"
                         }
                     ]
                 }
