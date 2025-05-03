@@ -25,6 +25,8 @@ class Patent(BaseModel):
         None, title="Country", description="The country of the patent.", examples=["FR"])
     publication_date: Optional[str] = Field(
         None, title="Publication Date", description="The publication date of the patent.", examples=["20230104"])
+    applicants: List[Applicant] = Field(
+        [], title="Applicants", description="The applicants of the patent.")
 
 
 class FullPatent(Patent):
@@ -32,8 +34,6 @@ class FullPatent(Patent):
         [], title="Descriptions", description="The descriptions of the patent.")
     claims: List[Claim] = Field(
         [], title="Claims", description="The claims of the patent.")
-    applicants: List[Applicant] = Field(
-        [], title="Applicants", description="The applicants of the patent.")
 
     model_config = {
         "json_schema_extra": {

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from backend.models.Patent import Patent, FullPatent
 from backend.services import patent_service
@@ -26,11 +26,11 @@ async def get_patent_by_number(patent_number: str) -> Patent:
     # Call the service function to get the patent
     patent = patent_service.get_patent_by_number(patent_number)
 
-    if patent:
-        return patent
+    if not patent:
+        logger.warning(f"Patent {patent_number} not found.")
+        raise HTTPException(status_code=404, detail="Patent not found.")
 
-    logger.warning(f"Patent {patent_number} not found.")
-    return None
+    return patent
 
 
 @router.get("/full/{patent_number}", response_model=FullPatent)
@@ -49,8 +49,32 @@ async def get_full_patent_by_number(patent_number: str) -> FullPatent:
     # Call the service function to get the full patent
     full_patent = patent_service.get_full_patent_by_number(patent_number)
 
-    if full_patent:
-        return full_patent
+    if not full_patent:
+        logger.warning(f"Full patent {patent_number} not found.")
+        raise HTTPException(status_code=404, detail="Patent not found.")
 
-    logger.warning(f"Full patent {patent_number} not found.")
-    return None
+    return full_patent
+
+
+@router.get("/applicant/{applicant_name}", response_model=list[Patent])
+async def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
+    """
+    Get all patents by applicant name.
+
+    Args:
+        applicant_name (str): The applicant name to search for.
+
+    Returns:
+        list[Patent]: A list of patent objects associated with the applicant.
+    """
+    logger.debug(f"Retrieving all patents by applicant: {applicant_name}")
+
+    # Call the service function to get all patents by applicant
+    patents = patent_service.get_all_patents_by_applicant(applicant_name)
+
+    if not patents:
+        logger.warning(f"No patents found for applicant {applicant_name}.")
+        raise HTTPException(
+            status_code=404, detail="No patents found for this applicant.")
+
+    return patents
