@@ -31,9 +31,8 @@ def drop_database_tables():
         logger.error(f"Failed to drop database tables: {e}")
         raise Exception(f"Failed to drop database tables: {e}")
 
-    finally:
-        cursor.close()
-        conn.close()
+    cursor.close()
+    conn.close()
 
 
 def create_patent_table():
@@ -101,9 +100,10 @@ def create_description_table():
     # Create the description table if it doesn't exist
     create_table_query = """
     CREATE TABLE IF NOT EXISTS patent_description (
-        description_number INT PRIMARY KEY,
+        description_number INT,
         patent_number VARCHAR(255) REFERENCES patent(number),
-        description_text TEXT
+        description_text TEXT,
+        PRIMARY KEY (description_number, patent_number)
     );
     """
     cursor.execute(create_table_query)
@@ -134,9 +134,10 @@ def create_claim_table():
     # Create the claim table if it doesn't exist
     create_table_query = """
     CREATE TABLE IF NOT EXISTS patent_claim (
-        claim_number INT PRIMARY KEY,
+        claim_number INT,
         patent_number VARCHAR(255) REFERENCES patent(number),
-        claim_text TEXT
+        claim_text TEXT,
+        PRIMARY KEY (claim_number, patent_number)
     );
     """
     cursor.execute(create_table_query)

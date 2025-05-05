@@ -7,7 +7,8 @@ Make sure to install Poetry and Python 3.13+.
 1. Install Poetry :
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
-export PATH=$HOME/.local/bin:$PATH
+echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc # or ~/.zshrc
+source ~/.bashrc # or ~/.zshrc
 ```
 
 If it works, you should be able to run:

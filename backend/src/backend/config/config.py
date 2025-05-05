@@ -1,10 +1,30 @@
 import psycopg2
 import os
+import yaml
+from backend.config.logging_config import logger
 
+# Load configuration from YAML file
+def load_config(file_path):
+    """
+    Load configuration from a YAML file.
 
+    Args:
+        file_path (str): Path to the YAML configuration file.
+
+    Returns:
+        dict: Configuration dictionary.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            config = yaml.safe_load(file)
+        return config
+    except Exception as e:
+        raise Exception(f"Failed to load configuration file: {e}")
+
+# Get database connection
 def get_db_connection():
     """
-    Get a database connection using the provided environment variables.
+    Get a database connection using the provided YAML configuration.
 
     Returns:
         psycopg2.extensions.connection: A connection object to the PostgreSQL database.
@@ -12,11 +32,19 @@ def get_db_connection():
     Raises:
         Exception: If the connection fails.
     """
-    db_host = os.environ.get('DB_HOST')
-    db_port = os.environ.get('DB_PORT')
-    db_name = os.environ.get('DB_NAME')
-    db_user = os.environ.get('DB_USER')
-    db_password = os.environ.get('DB_PASSWORD')
+    # Load configuration
+    config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
+    config = load_config(config_path)
+
+    db_config = config.get('database', {})
+    db_host = db_config.get('host')
+    db_port = db_config.get('port')
+    db_name = db_config.get('name')
+    db_user = db_config.get('user')
+    db_password = db_config.get('password')
+
+    logger.debug(
+        f"Connecting to database at {db_host}:{db_port}/{db_name} as user {db_user}")
 
     try:
         # Establish a connection to the PostgreSQL database

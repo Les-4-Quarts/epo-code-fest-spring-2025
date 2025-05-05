@@ -1,0 +1,14 @@
+ops:
+  consumer_key: <YOUR_CONSUMER_KEY>
+  consumer_secret_key: <YOUR_CONSUMER_SECRET_KEY>
+  ops_api_url: https://ops.epo.org/3.2
+
+database:
+  host: localhost
+  port: 5432
+  name: cep
+  user: user
+  password: password
+
+logging:
+  level: INFO
