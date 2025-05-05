@@ -3,7 +3,7 @@ import os
 import yaml
 from backend.config.logging_config import logger
 
-# Load configuration from YAML file
+
 def load_config(file_path):
     """
     Load configuration from a YAML file.
@@ -21,7 +21,7 @@ def load_config(file_path):
     except Exception as e:
         raise Exception(f"Failed to load configuration file: {e}")
 
-# Get database connection
+
 def get_db_connection():
     """
     Get a database connection using the provided YAML configuration.

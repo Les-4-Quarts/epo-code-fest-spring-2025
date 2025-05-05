@@ -5,7 +5,7 @@ ops:
 
 database:
   host: localhost
-  port: 5432
+  port: "5432"
   name: cep
   user: user
   password: password
