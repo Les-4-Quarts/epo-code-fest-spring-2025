@@ -1,5 +1,7 @@
+from fastapi import UploadFile
 from backend.repositories import patent_repository
 from backend.models.Patent import Patent, FullPatent
+from backend.models.Analysis import Analysis
 from backend.config.logging_config import logger
 
 
@@ -104,4 +106,36 @@ def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
         return [Patent(**patent) for patent in patents_data]
 
     logger.warning(f"No patents found for applicant {applicant_name}.")
+    return []
+
+
+def analyze_patent_pdf(pdf_file: UploadFile) -> list[Analysis]:
+    """
+    Analyze a patent PDF file and return the analysis results.
+
+    Args:
+        pdf_file (UploadFile): The PDF file to analyze.
+
+    Returns:
+        list[Analysis]: A list of analysis results.
+    """
+    logger.debug(f"Analyzing patent PDF file: {pdf_file.filename}")
+
+    # Call the repository function to analyze the patent PDF
+    # TODO: Implement the actual analysis logic
+    analysis_results = [
+        {
+            "text": "This is a sample text to analyze.",
+            "sdg": "SDG 1: No Poverty"
+        },
+        {
+            "text": "Another sample text for analysis.",
+            "sdg": "SDG 2: Zero Hunger"
+        }
+    ]
+
+    if analysis_results:
+        return [Analysis(**result) for result in analysis_results]
+
+    logger.warning("No analysis results found.")
     return []

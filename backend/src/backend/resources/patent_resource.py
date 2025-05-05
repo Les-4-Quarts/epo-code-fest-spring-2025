@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile
 
+from backend.models.Analysis import Analysis
 from backend.models.Patent import Patent, FullPatent
 from backend.services import patent_service
 from backend.config.logging_config import logger
@@ -98,3 +99,27 @@ async def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
             status_code=404, detail="No patents found for this applicant.")
 
     return patents
+
+
+@router.post("/analyze", response_model=list[Analysis])
+async def analyze_patent(pdf_file: UploadFile) -> list[Analysis]:
+    """
+    Analyze a patent PDF and extract relevant information.
+
+    Args:
+        pdf_file (bytes): The PDF file content.
+
+    Returns:
+        dict: Extracted information from the patent PDF.
+    """
+    logger.debug("Analyzing patent PDF.")
+
+    # Call the service function to analyze the PDF
+    try:
+        analysis_result = patent_service.analyze_patent_pdf(pdf_file)
+    except Exception as e:
+        logger.error(f"Error analyzing patent PDF: {e}")
+        raise HTTPException(
+            status_code=500, detail="Error analyzing patent PDF.")
+
+    return analysis_result
