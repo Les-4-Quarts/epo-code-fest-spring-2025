@@ -282,14 +282,13 @@ def get_full_patent(number: str) -> dict:
     return patent
 
 
-def get_all_patents() -> list:
+def get_all_patents(first: int = 0, last: int = 100) -> list:
     """
     Get all patents from the PostgreSQL database.
 
     Returns:
         list: A list of dictionaries containing patent data.
     """
-    # TODO: Apply pagination to this function
     logger.debug("Fetching all patents")
 
     conn = get_db_connection()
@@ -298,10 +297,12 @@ def get_all_patents() -> list:
     # Fetch the patent data from the database
     fetch_patent_query = """
     SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date 
-    FROM patent;
+    FROM patent
+    ORDER BY patent.publication_date DESC
+    LIMIT %s OFFSET %s;
     """
 
-    cursor.execute(fetch_patent_query)
+    cursor.execute(fetch_patent_query, (last, first))
     results = cursor.fetchall()
     cursor.close()
 
