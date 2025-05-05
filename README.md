@@ -37,7 +37,7 @@ Create the database with Docker:
 docker compose up postgres -d
 ```
 
-Create `.env` file copy from `.env.example` and fill in the values.
+Create `config.yaml` file copy from `config-example.yaml` and fill in the values.
 ```bash
 cd backend
 cp src/backend/config/config-example.yaml src/backend/config/config.yaml
@@ -50,5 +50,5 @@ poetry run python3 -m src.backend.init_db
 
 Download the `db.sql` file. Then run the `psql` command to import the data into the database:
 ```bash
-docker exec -i postgres psql -U postgres -d cep < <path-to-your-file>/db.sql
+docker exec -i postgres psql -U user -d cep < {path-to-your-file}/db.sql
 ```
