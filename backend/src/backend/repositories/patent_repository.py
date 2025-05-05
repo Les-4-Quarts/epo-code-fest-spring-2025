@@ -136,6 +136,10 @@ def get_patent(number: str) -> dict:
     cursor.execute(fetch_patent_query, (number,))
     result = cursor.fetchone()
 
+    if result is None:
+        logger.debug(f"No patent found for number: {number}")
+        return None
+
     patent = {
         "number": result[0],
         "en_title": result[1],
@@ -198,6 +202,10 @@ def get_full_patent(number: str) -> dict:
 
     cursor.execute(fetch_patent_query, (number,))
     result = cursor.fetchone()
+
+    if result is None:
+        logger.debug(f"No patent found for number: {number}")
+        return None
 
     patent = {
         "number": result[0],
@@ -297,6 +305,10 @@ def get_all_patents() -> list:
     results = cursor.fetchall()
     cursor.close()
 
+    if not results:
+        logger.debug("No patents found")
+        return None
+
     patents = []
     for result in results:
         patents.append({
@@ -362,6 +374,10 @@ def get_all_patents_by_applicant(applicant_name: str) -> list:
     cursor.execute(fetch_patent_query, (applicant_name,))
     results = cursor.fetchall()
     cursor.close()
+
+    if not results:
+        logger.debug(f"No patents found for applicant: {applicant_name}")
+        return None
 
     patents = []
     for result in results:
