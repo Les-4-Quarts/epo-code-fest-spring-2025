@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, Header, UploadFile
 
 from backend.models.Analysis import Analysis
-from backend.models.Patent import Patent, FullPatent
+from backend.models.Patent import Patent, FullPatent, PatentList
 from backend.services import patent_service
 from backend.config.logging_config import logger
 
@@ -11,23 +11,43 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[Patent])
-async def get_all_patents() -> list[Patent]:
+@router.get("/", response_model=PatentList)
+async def get_all_patents(
+    range_header: str = Header(default="1-100", alias="Range")
+) -> PatentList:
     """
-    Get all patents in the database.
+    Get all patents in the database within a specified range.
+
+    Args:
+        range_header (str): The range of patents to retrieve (e.g., "1-100"). The range cannot exceed 100 patents.
 
     Returns:
-        list[Patent]: A list of all patent objects.
+        PatentList: A list of patents within the specified range.
     """
-    logger.debug("Retrieving all patents.")
+    logger.debug(f"Retrieving all patents with range: {range_header}")
+
+    # Validate the range format
+    try:
+        first, last = map(int, range_header.split("-"))
+        if last - first + 1 > 100:
+            logger.warning("Range exceeds the maximum limit of 100.")
+            raise HTTPException(
+                status_code=401, detail="Range exceeds the maximum limit of 100."
+            )
+    except ValueError:
+        logger.error("Invalid range format.")
+        raise HTTPException(
+            status_code=400, detail="Invalid range format. Use 'start-end'."
+        )
 
     # Call the service function to get all patents
-    patents = patent_service.get_all_patents()
+    patents = patent_service.get_all_patents(first, last)
 
     if not patents:
         logger.warning("No patents found.")
         raise HTTPException(status_code=404, detail="No patents found.")
 
+    # Return the patents within the specified range
     return patents
 
 
@@ -77,12 +97,16 @@ async def get_full_patent_by_number(patent_number: str) -> FullPatent:
     return full_patent
 
 
-@router.get("/applicant/{applicant_name}", response_model=list[Patent])
-async def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
+@router.get("/applicant/{applicant_name}", response_model=PatentList)
+async def get_all_patents_by_applicant(
+    range_header: str = Header(default="1-100", alias="Range"),
+    applicant_name: str = None,
+) -> PatentList:
     """
     Get all patents by applicant name.
 
     Args:
+        range_header (str): The range of patents to retrieve (e.g., "1-100"). The range cannot exceed 100 patents.
         applicant_name (str): The applicant name to search for.
 
     Returns:
@@ -90,8 +114,23 @@ async def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
     """
     logger.debug(f"Retrieving all patents by applicant: {applicant_name}")
 
+    # Validate the range format
+    try:
+        first, last = map(int, range_header.split("-"))
+        if last - first + 1 > 100:
+            logger.warning("Range exceeds the maximum limit of 100.")
+            raise HTTPException(
+                status_code=401, detail="Range exceeds the maximum limit of 100."
+            )
+    except ValueError:
+        logger.error("Invalid range format.")
+        raise HTTPException(
+            status_code=400, detail="Invalid range format. Use 'start-end'."
+        )
+
     # Call the service function to get all patents by applicant
-    patents = patent_service.get_all_patents_by_applicant(applicant_name)
+    patents = patent_service.get_all_patents_by_applicant(
+        applicant_name, first, last)
 
     if not patents:
         logger.warning(f"No patents found for applicant {applicant_name}.")

@@ -1,6 +1,6 @@
 from fastapi import UploadFile
 from backend.repositories import patent_repository
-from backend.models.Patent import Patent, FullPatent
+from backend.models.Patent import Patent, FullPatent, PatentList
 from backend.models.Analysis import Analysis
 from backend.config.logging_config import logger
 
@@ -67,31 +67,44 @@ def get_full_patent_by_number(patent_number: str) -> FullPatent:
     return None
 
 
-def get_all_patents() -> list[Patent]:
+def get_all_patents(first: int = 1, last: int = 100) -> PatentList:
     """
     Retrieve all patents from the database.
 
+    Args:
+        first (int): The index of the first patent to retrieve.
+        last (int): The index of the last patent to retrieve.
+
     Returns:
-        list[Patent]: A list of patent objects.
+        PatentList: A list of all patent objects.
     """
     logger.debug("Retrieving all patents.")
 
     # Call the repository function to get all patents
-    patents_data = patent_repository.get_all_patents()
+    patents_data = patent_repository.get_all_patents(first, last)
 
     if patents_data:
-        return [Patent(**patent) for patent in patents_data]
+        patents = [Patent(**patent) for patent in patents_data["patents"]]
+        return PatentList(
+            total_count=patents_data["total_count"],
+            total_results=patents_data["total_results"],
+            first=patents_data["first"],
+            last=patents_data["last"],
+            patents=patents
+        )
 
     logger.warning("No patents found.")
     return []
 
 
-def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
+def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int = 100) -> list[Patent]:
     """
     Get all patents by applicant name.
 
     Args:
         applicant_name (str): The applicant name to search for.
+        first (int): The index of the first patent to retrieve.
+        last (int): The index of the last patent to retrieve.
 
     Returns:
         list[Patent]: A list of patent objects associated with the applicant.
@@ -100,10 +113,17 @@ def get_all_patents_by_applicant(applicant_name: str) -> list[Patent]:
 
     # Call the repository function to get all patents by applicant
     patents_data = patent_repository.get_all_patents_by_applicant(
-        applicant_name)
+        applicant_name, first, last)
 
     if patents_data:
-        return [Patent(**patent) for patent in patents_data]
+        patents = [Patent(**patent) for patent in patents_data["patents"]]
+        return PatentList(
+            total_count=patents_data["total_count"],
+            total_results=patents_data["total_results"],
+            first=patents_data["first"],
+            last=patents_data["last"],
+            patents=patents
+        )
 
     logger.warning(f"No patents found for applicant {applicant_name}.")
     return []

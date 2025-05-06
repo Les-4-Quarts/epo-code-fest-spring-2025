@@ -282,17 +282,55 @@ def get_full_patent(number: str) -> dict:
     return patent
 
 
-def get_all_patents(first: int = 0, last: int = 100) -> list:
+def get_all_patents(first: int = 1, last: int = 100) -> dict:
     """
-    Get all patents from the PostgreSQL database.
+    Get all patents from the PostgreSQL database order by publication date.
+
+    Args:
+        first (int): The starting index for pagination.
+        last (int): The ending index for pagination.
 
     Returns:
         list: A list of dictionaries containing patent data.
+
+    Example:
+        ```
+        {
+            "patents": [
+                {
+                    "number": "US1234567",
+                    "en_title": "Patent Title",
+                    "fr_title": "Titre du brevet",
+                    "de_title": "Patentüberschrift",
+                    "en_abstract": "Patent abstract in English",
+                    "fr_abstract": "Résumé du brevet en français",
+                    "de_abstract": "Patentzusammenfassung auf Deutsch",
+                    "country": "US",
+                    "publication_date": "2023-01-01",
+                    "applicants": [
+                        {"name": "Applicant Name", "patent_number": "US1234567"}
+                    ]
+                }
+            ],
+            "total_count": 1000,
+            "first": 0,
+            "last": 100,
+            "total_results": 100
+        }
+        ```
     """
     logger.debug("Fetching all patents")
 
     conn = get_db_connection()
+
+    # Fetch the total number of patents
+    fetch_count_query = """
+    SELECT COUNT(*) FROM patent;
+    """
     cursor = conn.cursor()
+    cursor.execute(fetch_count_query)
+    total_patents = cursor.fetchone()[0]
+    cursor.close()
 
     # Fetch the patent data from the database
     fetch_patent_query = """
@@ -302,6 +340,7 @@ def get_all_patents(first: int = 0, last: int = 100) -> list:
     LIMIT %s OFFSET %s;
     """
 
+    cursor = conn.cursor()
     cursor.execute(fetch_patent_query, (last, first))
     results = cursor.fetchall()
     cursor.close()
@@ -346,18 +385,51 @@ def get_all_patents(first: int = 0, last: int = 100) -> list:
 
     logger.debug("All patents fetched successfully")
 
-    return patents
+    return {
+        "patents": patents,
+        "total_count": total_patents,
+        "first": first,
+        "last": min(last, total_patents),
+        "total_results": len(patents)
+    }
 
 
-def get_all_patents_by_applicant(applicant_name: str) -> list:
+def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int = 100) -> dict:
     """
-    Get all patents by applicant name from the PostgreSQL database.
+    Get all patents by applicant name from the PostgreSQL database order by publication date.
 
     Args:
         applicant_name (str): The applicant name.
+        first (int): The starting index for pagination.
+        last (int): The ending index for pagination.
 
     Returns:
-        list: A list of dictionaries containing patent data.
+        dict: A dictionary containing patent data.
+    Example:
+        ```
+        {
+            "patents": [
+                {
+                    "number": "US1234567",
+                    "en_title": "Patent Title",
+                    "fr_title": "Titre du brevet",
+                    "de_title": "Patentüberschrift",
+                    "en_abstract": "Patent abstract in English",
+                    "fr_abstract": "Résumé du brevet en français",
+                    "de_abstract": "Patentzusammenfassung auf Deutsch",
+                    "country": "US",
+                    "publication_date": "2023-01-01",
+                    "applicants": [
+                        {"name": "Applicant Name", "patent_number": "US1234567"}
+                    ]
+                }
+            ],
+            "total_count": 1000,
+            "first": 0,
+            "last": 100,
+            "total_results": 100
+        }
+        ```
     """
     logger.debug(f"Fetching all patents for applicant: {applicant_name}")
 
@@ -369,10 +441,12 @@ def get_all_patents_by_applicant(applicant_name: str) -> list:
     SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date
     FROM patent
     JOIN patent_applicant ON patent.number = patent_applicant.patent_number
-    WHERE LOWER(patent_applicant.applicant_name) = LOWER(%s);
+    WHERE LOWER(patent_applicant.applicant_name) = LOWER(%s)
+    ORDER BY patent.publication_date DESC
+    LIMIT %s OFFSET %s;
     """
 
-    cursor.execute(fetch_patent_query, (applicant_name,))
+    cursor.execute(fetch_patent_query, (applicant_name, first, last))
     results = cursor.fetchall()
     cursor.close()
 
@@ -417,4 +491,10 @@ def get_all_patents_by_applicant(applicant_name: str) -> list:
     logger.debug(
         f"All patents fetched successfully for applicant: {applicant_name}")
 
-    return patents
+    return {
+        "patents": patents,
+        "total_count": len(patents),
+        "first": first,
+        "last": min(last, len(patents)),
+        "total_results": len(patents)
+    }

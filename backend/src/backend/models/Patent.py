@@ -72,3 +72,42 @@ class FullPatent(Patent):
             ]
         }
     }
+
+
+class PatentList(BaseModel):
+    total_count: int = Field(
+        0, title="Total Count", description="The total number of patents.")
+    first: int = Field(
+        0, title="First", description="The index of the first patent in the list.")
+    last: int = Field(
+        0, title="Last", description="The index of the last patent in the list.")
+    total_results: int = Field(
+        0, title="Total Results", description="The total number of results.")
+    patents: List[Patent] = Field(
+        [], title="Patents", description="A list of patents.")
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "total_count": 1,
+                    "first": 0,
+                    "last": 0,
+                    "total_results": 1,
+                    "patents": [
+                        {
+                            "number": "EP0000000",
+                            "en_title": "Test patent",
+                            "fr_title": "Brevet test",
+                            "de_title": "Beispiel Titel",
+                            "en_abstract": "This is an example abstract",
+                            "fr_abstract": "Ce est un exemple d'abstract",
+                            "de_abstract": "Dies ist ein Beispiel-Abstract",
+                            "country": "FR",
+                            "publication_date": "20230104"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
