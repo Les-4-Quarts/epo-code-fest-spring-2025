@@ -29,6 +29,13 @@ const componentKey = ref(Date.now())
   min-height: 100vh;
   background-color: var(--neutral-lowest);
   color: var(--neutral-hightest);
+
+  // Background image
+  background-image: url('@/assets/images/background.svg');
+  background-repeat: no-repeat;
+  background-size: 150%;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .page {
