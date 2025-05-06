@@ -139,3 +139,8 @@
   --opened: false;
   --opened-sdg: false;
 }
+
+/* Global styles */
+html {
+  font-family: 'Inter', sans-serif;
+}
