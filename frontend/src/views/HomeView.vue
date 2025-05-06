@@ -2,12 +2,28 @@
 //Locales
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
+
+// Components
+import BasicCard from '@/components/Cards/BasicCard.vue'
 </script>
 
 <template>
   <div class="home">
-    <h1>{{ $t('home.welcome') }}</h1>
+    <BasicCard class="home-card" :title="$t('home.welcome')"> </BasicCard>
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+
+  .home-card {
+    width: 412px;
+    height: 504px;
+  }
+}
+</style>

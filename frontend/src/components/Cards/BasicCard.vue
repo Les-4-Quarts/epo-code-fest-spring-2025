@@ -57,8 +57,10 @@ defineProps({
   align-items: center;
   background-color: #e6e6e6;
   border-radius: 8px;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   padding: 16px;
+  background-color: var(--neutral-low-opacity);
+  backdrop-filter: blur(15px);
 
   .title {
     width: 100%;
