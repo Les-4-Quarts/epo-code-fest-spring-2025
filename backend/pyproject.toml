@@ -16,13 +16,12 @@ dependencies = [
     "pyyaml (>=6.0.2,<7.0.0)",
 ]
 
-[project.scripts]
-start = "backend.main:main"
-dev = "backend.main:dev"
-
 [tool.poetry]
 packages = [{include = "backend", from = "src"}]
 
+[tool.poetry.scripts]
+start = "backend.main:main"
+dev = "backend.main:dev"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
