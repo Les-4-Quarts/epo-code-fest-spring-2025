@@ -8,7 +8,7 @@ const props = defineProps({
   color: {
     type: String,
     required: false,
-    default: 'var(--primary-text-color)',
+    default: 'var(--neutral-hightest)',
   },
   bgColor: {
     type: String,

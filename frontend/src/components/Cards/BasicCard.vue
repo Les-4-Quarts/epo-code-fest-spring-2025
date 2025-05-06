@@ -69,7 +69,7 @@ defineProps({
 
     h3 {
       font-size: 40px;
-      color: var(--primary-text-color);
+      color: var(--neutral-hightest);
     }
 
     .line {

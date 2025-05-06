@@ -2,7 +2,7 @@
 import { RouterView } from 'vue-router'
 import Footer from './components/Footer.vue'
 import { ref } from 'vue'
-import SidePannel from './components/SidePannel.vue'
+import SidePanel from './components/SidePanel.vue'
 
 import { useThemeStore } from './stores/themeStore'
 const themeStore = useThemeStore()
@@ -13,7 +13,7 @@ const componentKey = ref(Date.now())
 <template>
   <div :class="['container', { dark: themeStore.isDarkTheme }]">
     <div class="page">
-      <SidePannel is-open />
+      <SidePanel is-open />
       <main>
         <RouterView :key="componentKey" />
       </main>
@@ -27,11 +27,8 @@ const componentKey = ref(Date.now())
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-
-  &.dark {
-    color: var(--secondary-text-color);
-    background-color: var(--dark-color);
-  }
+  background-color: var(--neutral-lowest);
+  color: var(--neutral-hightest);
 }
 
 .page {
@@ -42,7 +39,7 @@ const componentKey = ref(Date.now())
   main {
     display: flex;
     flex: 1;
-    margin-left: 300px;
+    margin-left: 180px;
   }
 }
 </style>

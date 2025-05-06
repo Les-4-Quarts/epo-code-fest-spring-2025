@@ -2,6 +2,7 @@
 import SvgIcon from '@jamescoyle/vue-icon'
 import SpinnerLoader from '../Loaders/SpinnerLoader.vue'
 import { useRouter } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import { onMounted, ref, watch } from 'vue'
 
 // Props
@@ -44,7 +45,7 @@ const props = defineProps({
     default: false,
   },
   to: {
-    type: String,
+    type: Object as () => RouteLocationRaw,
     required: false,
   },
 })
@@ -79,7 +80,7 @@ const loadIcon = async (iconName: undefined | string) => {
     iconPath.value = module[iconName]
   } catch (error) {
     console.error(`Failed to load icon: ${iconName}`, error)
-    iconPath.value = undefined
+    iconPath.value = 'undefined'
   }
 }
 
@@ -97,7 +98,7 @@ watch(
   <button
     @click="onClick"
     :disabled="isLoading || disabled"
-    :class="['button', { disabled: disabled }]"
+    :class="['button', { disabled: disabled }, { 'is-active': isActive }]"
     :style="{
       color: isActive ? activeColor : color,
       backgroundColor: isActive ? activeBgColor : bgColor,
@@ -110,11 +111,11 @@ watch(
         type="mdi"
         :path="iconPath"
         :size="iconSize"
-        :style="{ color: color }"
+        :style="{ color: isActive ? activeColor : color }"
         :class="['icon', { 'icon-with-text': text }]"
       />
-      <span>{{ text }}</span></template
-    >
+      <span class="text">{{ text }}</span>
+    </template>
   </button>
 </template>
 

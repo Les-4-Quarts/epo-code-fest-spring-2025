@@ -2,6 +2,7 @@
 // Components
 import SvgIcon from '@jamescoyle/vue-icon'
 import { mdiWeatherSunny, mdiWeatherNight } from '@mdi/js'
+import BigButton from './Buttons/BigButton.vue'
 
 // Stores
 import { useThemeStore } from '@/stores/themeStore'
@@ -9,7 +10,18 @@ const themeStore = useThemeStore()
 
 // Locales
 import { useI18n } from 'vue-i18n'
-const { locale } = useI18n()
+const { locale, t } = useI18n()
+
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+const route = useRoute()
+
+const activeTab = computed(() => {
+  return route.name
+})
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 function changeLanguage(event: Event) {
   const selectedLanguage = (event.target as HTMLSelectElement).value
@@ -25,9 +37,28 @@ defineProps({
 <template>
   <div class="side-panel" :class="{ open: isOpen }">
     <div class="header">
-      <h1>EPA</h1>
+      <h1 @click="router.push({ name: 'home' })">CEP</h1>
     </div>
-    <div class="content"></div>
+    <div class="content">
+      <BigButton
+        :text="$t('panel.analyze-patent')"
+        icon="mdiProgressUpload"
+        :is-active="activeTab === 'analyze'"
+        :to="{ name: 'analyze' }"
+      />
+      <BigButton
+        :text="$t('panel.explore-patents')"
+        icon="mdiMapSearchOutline"
+        :is-active="activeTab === 'explore'"
+        :to="{ name: 'explore' }"
+      />
+      <BigButton
+        :text="$t('panel.search-applicant')"
+        icon="mdiBriefcaseSearchOutline"
+        :is-active="activeTab === 'applicant'"
+        :to="{ name: 'applicant' }"
+      />
+    </div>
     <div class="footer">
       <select class="language-selector" @change="changeLanguage">
         <option value="en">English</option>
@@ -39,9 +70,7 @@ defineProps({
         :path="themeStore.isDarkTheme ? mdiWeatherSunny : mdiWeatherNight"
         type="mdi"
         @click="themeStore.toggleTheme"
-        :color="
-          themeStore.isDarkTheme ? 'var(--secondary-text-color)' : 'var(--primary-text-color)'
-        "
+        :color="themeStore.isDarkTheme ? 'var(--secondary-text-color)' : 'var(--neutral-hightest)'"
         :size="24"
       />
     </div>
@@ -51,11 +80,14 @@ defineProps({
 <style lang="scss" scoped>
 /* Container styles */
 .side-panel {
-  --vertical-padding: 50px;
+  --vertical-padding: 10px;
   --horizontal-padding: 10px;
   --height: 100vh;
-  --width: 300px;
+  --width: 180px;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: fixed;
   width: calc(var(--width) - var(--horizontal-padding) * 2);
   height: calc(var(--height) - var(--vertical-padding) * 2);
@@ -65,24 +97,35 @@ defineProps({
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
 
-  background-color: #f4f3f3;
+  background-color: var(--neutral-lower);
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 
   .header {
     display: flex;
     padding: 10px;
-    border-bottom: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    h1 {
+      font-size: 64px;
+      font-weight: 800;
+      color: var(--neutral-hightest);
+    }
   }
 
   .content {
     overflow-y: auto;
-    height: calc(var(--height) - 2 * var(--vertical-padding) - 40px); /* Adjust for header height */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
   }
 
   .footer {
     display: flex;
     padding: 10px;
-    border-top: 2px solid #000;
 
     .theme-icon {
       cursor: pointer;
@@ -100,17 +143,6 @@ defineProps({
     }
   }
 }
-
-.dark .side-panel {
-  background-color: #292524;
-  color: var(--secondary-text-color);
-
-  .header,
-  .footer {
-    border-color: var(--secondary-text-color);
-  }
-}
-
 .side-panel.open {
   transform: translateX(var(--width)); /* Slide in */
 }
