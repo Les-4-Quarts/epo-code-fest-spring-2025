@@ -2,11 +2,15 @@
 defineProps({
   color: {
     type: String,
-    default: 'var(--primary-color)',
+    default: 'var(--neutral-hightest)',
   },
   size: {
     type: Number,
-    default: 1,
+    default: 32,
+  },
+  borderWidth: {
+    type: Number,
+    default: 0.2,
   },
 })
 </script>
@@ -14,7 +18,12 @@ defineProps({
 <template>
   <div
     class="loader"
-    :style="{ borderColor: color, width: size + 'em', height: size + 'em' }"
+    :style="{
+      borderColor: color,
+      width: size + 'em',
+      height: size + 'em',
+      borderWidth: borderWidth + 'em',
+    }"
   ></div>
 </template>
 
@@ -22,7 +31,7 @@ defineProps({
 .loader {
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 0.2em solid var(--primary-color);
+  border: 0.2em solid var(--neutral-hightest);
   animation:
     l20-1 0.8s infinite linear alternate,
     l20-2 1.6s infinite linear;

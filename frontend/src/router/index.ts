@@ -12,7 +12,7 @@ const router = createRouter({
     {
       path: '/analyze',
       name: 'analyze',
-      component: () => import('../views/HomeView.vue')
+      component: () => import('../views/AnalyzeView.vue')
     },
     {
       path: '/explore',
