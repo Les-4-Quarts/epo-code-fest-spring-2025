@@ -11,49 +11,86 @@ import BasicButton from '@/components/Buttons/BasicButton.vue'
 import SpinnerLoader from '@/components/Loaders/SpinnerLoader.vue'
 
 // Refs
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import BasicChip from '@/components/Chips/BasicChip.vue'
+import { Doughnut } from 'vue-chartjs'
 const selectedFile = ref<File | null>(null)
-const analysisResult = ref([
-  {
-    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 1: No Poverty',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 1: No Poverty',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 3: Good Health and Well-being',
-  },
+const analysisResult = ref<any[] | null>(null)
+// const analysisResult = ref([
+//   {
+//     text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 1: No Poverty',
+//   },
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 2: Zero Hunger',
+//   },
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 1: No Poverty',
+//   },
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 3: Good Health and Well-being',
+//   },
 
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-])
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 2: Zero Hunger',
+//   },
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 2: Zero Hunger',
+//   },
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 2: Zero Hunger',
+//   },
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 2: Zero Hunger',
+//   },
+//   {
+//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+//     sdg: 'SDG 2: Zero Hunger',
+//   },
+// ])
 const isLoading = ref(false)
+
+const doughnutData = computed(() => {
+  if (!analysisResult.value) {
+    return null
+  }
+
+  // Retrive all labels from the analysis result. Keep only unique labels
+  const labels = analysisResult.value
+    .map((result) => result.sdg)
+    .filter((value, index, self) => self.indexOf(value) === index)
+
+  // Count the number of times each label appears in the analysis result
+  const data = labels.map((label) => {
+    if (!analysisResult.value) {
+      return 0
+    }
+    return analysisResult.value.filter((result) => result.sdg === label).length
+  })
+
+  // Generate a color for each label
+  const backgroundColor = labels.map((label) => {
+    const color = cssvar(`--${label.split(':')[0].trim().toLowerCase().replace(' ', '-')}`)
+    return color
+  })
+
+  return {
+    labels,
+    datasets: [
+      {
+        data,
+        backgroundColor,
+      },
+    ],
+  }
+})
 
 // Methods
 function openFileDialog() {
@@ -108,6 +145,10 @@ function handleFileSend() {
       })
   }
 }
+
+function cssvar(name: string) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name)
+}
 </script>
 
 <template>
@@ -119,7 +160,12 @@ function handleFileSend() {
 
         <div v-if="selectedFile" class="file-info">
           <span>{{ $t('analyze.fileSelected') }}: {{ selectedFile.name }}</span>
-          <BasicButton :text="$t('analyze.analyze')" @click="handleFileSend" />
+          <BasicButton
+            :text="$t('analyze.analyze')"
+            @click="handleFileSend"
+            color="var(--neutral-lowest)"
+            bg-color="var(--primary-highter)"
+          />
         </div>
       </div>
 
@@ -146,7 +192,19 @@ function handleFileSend() {
               </p>
             </div>
           </div>
-          <div class="camembert"></div>
+          <div class="camembert">
+            <Doughnut
+              v-if="doughnutData"
+              :data="doughnutData"
+              :options="{
+                plugins: {
+                  legend: {
+                    display: false,
+                  },
+                },
+              }"
+            />
+          </div>
         </div>
       </div>
     </BasicCard>
@@ -228,6 +286,7 @@ function handleFileSend() {
         flex-direction: row;
         overflow-y: scroll;
         height: 100%;
+        width: 100%;
         gap: 30px;
         padding: 0px 15px;
 
@@ -235,6 +294,7 @@ function handleFileSend() {
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
+          flex: 1;
           gap: 41px;
 
           .chip {
@@ -250,11 +310,8 @@ function handleFileSend() {
         }
 
         .camembert {
-          width: 233px;
-          height: 233px;
-          background-color: var(--neutral-highter);
-          border-radius: 50%;
-          flex-shrink: 0; // Prevent the camembert from shrinking
+          width: 233px !important;
+          height: 233px !important;
           position: sticky;
           top: 50%;
           transform: translateY(-50%); // To center perfectly
