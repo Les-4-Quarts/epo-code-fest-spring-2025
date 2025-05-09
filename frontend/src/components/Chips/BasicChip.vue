@@ -14,18 +14,11 @@ defineProps({
 
 <style scoped lang="scss">
 .chip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: 9999px;
   font-size: 14px;
   color: #fff; /* Default text color */
   background-color: var(--primary-color); /* Default color */
-
-  .dark & {
-    color: #fff; /* Dark mode text color */
-    background-color: var(--secondary-dark-color); /* Dark mode background color */
-  }
 }
 </style>

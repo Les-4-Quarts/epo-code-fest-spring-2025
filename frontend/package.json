@@ -17,6 +17,7 @@
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/js": "^7.4.47",
+    "d3": "^7.9.0",
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-i18n": "^10.0.7",
@@ -32,6 +33,7 @@
     "@storybook/vue3": "^8.6.12",
     "@storybook/vue3-vite": "^8.6.12",
     "@tsconfig/node22": "^22.0.0",
+    "@types/d3": "^7.4.3",
     "@types/node": "^22.13.9",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/browser": "^3.1.1",

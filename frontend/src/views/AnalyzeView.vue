@@ -15,8 +15,43 @@ import { ref } from 'vue'
 import BasicChip from '@/components/Chips/BasicChip.vue'
 const selectedFile = ref<File | null>(null)
 const analysisResult = ref([
-  { text: 'This is a sample text to analyze.', sdg: 'SDG 1: No Poverty' },
-  { text: 'Another sample text for analysis.', sdg: 'SDG 2: Zero Hunger' },
+  {
+    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 1: No Poverty',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 1: No Poverty',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 3: Good Health and Well-being',
+  },
+
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
 ])
 const isLoading = ref(false)
 
@@ -101,9 +136,10 @@ function handleFileSend() {
           <div class="results-text">
             <div v-for="(result, index) in analysisResult" :key="index">
               <BasicChip
+                class="chip"
                 :title="result.sdg"
-                color="var(--neutral-hightest)"
-                :bgColor="`var(--sdg-${result.sdg.split(':')[1].trim()})`"
+                color="white"
+                :bgColor="`var(--${result.sdg.split(':')[0].trim().toLowerCase().replace(' ', '-')})`"
               />
               <p>
                 {{ result.text }}
@@ -171,7 +207,7 @@ function handleFileSend() {
 
   .analyze-result-card {
     width: 90%;
-    height: 90%;
+    height: 90vh;
 
     .content {
       width: 100%;
@@ -190,28 +226,38 @@ function handleFileSend() {
       .results {
         display: flex;
         flex-direction: row;
-        align-items: center;
+        overflow-y: scroll;
         height: 100%;
-        gap: 20px;
+        gap: 30px;
+        padding: 0px 15px;
 
         .results-text {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          gap: 10px;
+          justify-content: flex-start;
+          gap: 41px;
+
+          .chip {
+            margin-bottom: 15px;
+            font-size: 13px;
+            font-weight: 500;
+          }
 
           p {
             font-size: 20px;
             font-weight: 600;
-            text-align: center;
           }
         }
 
         .camembert {
-          width: 200px;
-          height: 200px;
+          width: 233px;
+          height: 233px;
           background-color: var(--neutral-highter);
           border-radius: 50%;
+          flex-shrink: 0; // Prevent the camembert from shrinking
+          position: sticky;
+          top: 50%;
+          transform: translateY(-50%); // To center perfectly
         }
       }
     }
