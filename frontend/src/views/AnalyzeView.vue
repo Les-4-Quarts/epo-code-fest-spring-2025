@@ -6,7 +6,7 @@ const { t } = useI18n()
 // Components
 import BasicCard from '@/components/Cards/BasicCard.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiPlusBox } from '@mdi/js'
+import { mdiPlusBox, mdiClose } from '@mdi/js'
 import BasicButton from '@/components/Buttons/BasicButton.vue'
 import SpinnerLoader from '@/components/Loaders/SpinnerLoader.vue'
 
@@ -15,46 +15,46 @@ import { computed, ref } from 'vue'
 import BasicChip from '@/components/Chips/BasicChip.vue'
 import { Doughnut } from 'vue-chartjs'
 const selectedFile = ref<File | null>(null)
-const analysisResult = ref<any[] | null>(null)
-// const analysisResult = ref([
-//   {
-//     text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 1: No Poverty',
-//   },
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 2: Zero Hunger',
-//   },
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 1: No Poverty',
-//   },
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 3: Good Health and Well-being',
-//   },
+// const analysisResult = ref<any[] | null>(null)
+const analysisResult = ref<any[] | null>([
+  {
+    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 1: No Poverty',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 1: No Poverty',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 3: Good Health and Well-being',
+  },
 
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 2: Zero Hunger',
-//   },
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 2: Zero Hunger',
-//   },
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 2: Zero Hunger',
-//   },
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 2: Zero Hunger',
-//   },
-//   {
-//     text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-//     sdg: 'SDG 2: Zero Hunger',
-//   },
-// ])
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+  {
+    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
+    sdg: 'SDG 2: Zero Hunger',
+  },
+])
 const isLoading = ref(false)
 
 const doughnutData = computed(() => {
@@ -146,6 +146,10 @@ function handleFileSend() {
   }
 }
 
+function closeResults() {
+  analysisResult.value = null
+}
+
 function cssvar(name: string) {
   return getComputedStyle(document.documentElement).getPropertyValue(name)
 }
@@ -177,6 +181,7 @@ function cssvar(name: string) {
 
     <BasicCard v-else class="analyze-result-card">
       <div class="content">
+        <SvgIcon class="close" type="mdi" :path="mdiClose" @click="closeResults" />
         <h2>{{ $t('analyze.about') }}</h2>
         <div class="results">
           <div class="results-text">
@@ -274,6 +279,17 @@ function cssvar(name: string) {
       flex-direction: column;
       align-items: center;
       gap: 29px;
+
+      .close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+
+        &:hover {
+          scale: 110%;
+        }
+      }
 
       h2 {
         font-size: 32px;
