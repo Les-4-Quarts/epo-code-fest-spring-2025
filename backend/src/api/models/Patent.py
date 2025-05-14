@@ -1,9 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
-from backend.models.Claim import Claim
-from backend.models.Description import Description
-from backend.models.Applicant import Applicant
+from api.models.Claim import Claim
+from api.models.Description import Description
+from api.models.Applicant import Applicant
 
 
 class Patent(BaseModel):

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Header, UploadFile
 
-from backend.models.Analysis import Analysis
-from backend.models.Patent import Patent, FullPatent, PatentList
-from backend.services import patent_service
-from backend.config.logging_config import logger
+from api.models.Analysis import Analysis
+from api.models.Patent import Patent, FullPatent, PatentList
+from api.services import patent_service
+from api.config.logging_config import logger
 
 router = APIRouter(
     prefix="/patents",

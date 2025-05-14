@@ -1,5 +1,5 @@
 [project]
-name = "backend"
+name = "cep"
 version = "0.1.0"
 description = ""
 authors = [
@@ -17,11 +17,11 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "backend", from = "src"}]
+packages = [{include = "api", from = "src"}]
 
 [tool.poetry.scripts]
-start = "backend.main:main"
-dev = "backend.main:dev"
+start = "api.main:main"
+dev = "api.main:dev"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"

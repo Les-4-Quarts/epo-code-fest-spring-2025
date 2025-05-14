@@ -1,8 +1,8 @@
 from fastapi import UploadFile
-from backend.repositories import patent_repository
-from backend.models.Patent import Patent, FullPatent, PatentList
-from backend.models.Analysis import Analysis
-from backend.config.logging_config import logger
+from api.repositories import patent_repository
+from api.models.Patent import Patent, FullPatent, PatentList
+from api.models.Analysis import Analysis
+from api.config.logging_config import logger
 
 
 def create_patent(patent: Patent):

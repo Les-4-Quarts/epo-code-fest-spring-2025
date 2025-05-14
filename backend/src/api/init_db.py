@@ -1,5 +1,5 @@
-from backend.config.db_config import get_db_connection
-from backend.config.logging_config import logger
+from api.config.db_config import get_db_connection
+from api.config.logging_config import logger
 
 
 def drop_database_tables():
