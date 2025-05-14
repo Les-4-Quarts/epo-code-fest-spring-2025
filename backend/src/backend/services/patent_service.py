@@ -35,7 +35,7 @@ def get_patent_by_number(patent_number: str) -> Patent:
     logger.debug(f"Retrieving patent by number: {patent_number}")
 
     # Call the repository function to get the patent
-    patent_data = patent_repository.get_patent(patent_number)
+    patent_data = patent_repository.get_patent_by_number(patent_number)
 
     if patent_data:
         return Patent(**patent_data)
@@ -57,7 +57,7 @@ def get_full_patent_by_number(patent_number: str) -> FullPatent:
     logger.debug(f"Retrieving full patent by number: {patent_number}")
 
     # Call the repository function to get the full patent
-    full_patent_data = patent_repository.get_full_patent(
+    full_patent_data = patent_repository.get_full_patent_by_number(
         patent_number)
 
     if full_patent_data:

@@ -112,7 +112,7 @@ def create_patent(patent: dict):
         f"Patent data inserted successfully for number: {patent['number']}")
 
 
-def get_patent(number: str) -> dict:
+def get_patent_by_number(number: str) -> dict:
     """
     Get patent data from the PostgreSQL database.
 
@@ -179,7 +179,7 @@ def get_patent(number: str) -> dict:
     return patent
 
 
-def get_full_patent(number: str) -> dict:
+def get_full_patent_by_number(number: str) -> dict:
     """
     Get patent data with description and claims from the PostgreSQL database.
 
