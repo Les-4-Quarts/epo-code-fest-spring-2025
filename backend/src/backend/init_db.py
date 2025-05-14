@@ -49,6 +49,7 @@ def create_patent_table():
     - `de_abstract`: the abstract of the patent in German
     - `country`: the country of the patent
     - `publication_date`: the publication date of the patent
+    - `is_analyzed`: a boolean indicating if the patent has been analyzed
 
     Returns:
         None
@@ -69,7 +70,8 @@ def create_patent_table():
         fr_abstract TEXT,
         de_abstract TEXT,
         country VARCHAR(10),
-        publication_date TEXT
+        publication_date TEXT,
+        is_analyzed BOOLEAN DEFAULT FALSE
     );
     """
     cursor.execute(create_table_query)
@@ -88,6 +90,7 @@ def create_description_table():
     - `description_number`: the id of the description (PK)
     - `patent_number`: the patent number (PK, FK)
     - `description_text`: the text of the description
+    - `sdg`: the SDG of the description
 
     Returns:
         None
@@ -103,6 +106,7 @@ def create_description_table():
         description_number INT,
         patent_number VARCHAR(255) REFERENCES patent(number),
         description_text TEXT,
+        sdg VARCHAR(255),
         PRIMARY KEY (description_number, patent_number)
     );
     """
@@ -122,6 +126,7 @@ def create_claim_table():
     - `claim_number`: the id of the claim (PK)
     - `patent_number`: the patent number (PK, FK)
     - `claim_text`: the text of the claim
+    - `sdg`: the SDG of the claim
 
     Returns:
         None
@@ -137,6 +142,7 @@ def create_claim_table():
         claim_number INT,
         patent_number VARCHAR(255) REFERENCES patent(number),
         claim_text TEXT,
+        sdg VARCHAR(255),
         PRIMARY KEY (claim_number, patent_number)
     );
     """
@@ -180,6 +186,39 @@ def create_applicant_table():
     logger.info("Patent applicant table created successfully.")
 
 
+def create_sdg_summary_table():
+    """
+    Create a table for storing for a patent why it is related to a specific SDG.
+
+    Description:
+    - `patent_number`: the patent number (PK, FK)
+    - `sdg`: the SDG of the patent (PK)
+    - `sdg_description`: the description why the patent is related to the SDG
+    Returns:
+        None
+    """
+    logger.info("Creating patent SDG summary table...")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Create the SDG summary table if it doesn't exist
+    create_table_query = """
+    CREATE TABLE IF NOT EXISTS patent_sdg_summary (
+        patent_number VARCHAR(255) REFERENCES patent(number),
+        sdg VARCHAR(255),
+        sdg_description TEXT,
+        PRIMARY KEY (patent_number, sdg)
+    );
+    """
+    cursor.execute(create_table_query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    logger.info("Patent SDG summary table created successfully.")
+
+
 if __name__ == "__main__":
     # Drop existing tables
     drop_database_tables()
@@ -189,3 +228,4 @@ if __name__ == "__main__":
     create_description_table()
     create_claim_table()
     create_applicant_table()
+    create_sdg_summary_table()
