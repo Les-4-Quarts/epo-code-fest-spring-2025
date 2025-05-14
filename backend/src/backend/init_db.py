@@ -21,6 +21,7 @@ def drop_database_tables():
         cursor.execute("DROP TABLE IF EXISTS patent_claim")
         cursor.execute("DROP TABLE IF EXISTS patent_description")
         cursor.execute("DROP TABLE IF EXISTS patent_applicant")
+        cursor.execute("DROP TABLE IF EXISTS patent_sdg_summary")
 
         # Commit the changes to the database
         conn.commit()
