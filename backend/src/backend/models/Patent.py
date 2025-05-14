@@ -27,6 +27,8 @@ class Patent(BaseModel):
         None, title="Publication Date", description="The publication date of the patent.", examples=["20230104"])
     applicants: List[Applicant] = Field(
         [], title="Applicants", description="The applicants of the patent.")
+    is_analyzed: Optional[bool] = Field(
+        False, title="Is Analyzed", description="Indicates if the patent has been analyzed.", examples=[False])
 
 
 class FullPatent(Patent):
@@ -48,6 +50,7 @@ class FullPatent(Patent):
                     "de_abstract": "Dies ist ein Beispiel-Abstract",
                     "country": "FR",
                     "publication_date": "20230104",
+                    "is_analyzed": False,
                     "description": [
                         {
                             "description_number": 1,
@@ -104,7 +107,8 @@ class PatentList(BaseModel):
                             "fr_abstract": "Ce est un exemple d'abstract",
                             "de_abstract": "Dies ist ein Beispiel-Abstract",
                             "country": "FR",
-                            "publication_date": "20230104"
+                            "publication_date": "20230104",
+                            "is_analyzed": False,
                         }
                     ]
                 }

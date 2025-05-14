@@ -150,6 +150,7 @@ def get_patent_by_number(number: str) -> dict:
         "de_abstract": result[6],
         "country": result[7],
         "publication_date": result[8],
+        "is_analyzed": result[9],
         "applicants": []
     }
 
@@ -217,6 +218,7 @@ def get_full_patent_by_number(number: str) -> dict:
         "de_abstract": result[6],
         "country": result[7],
         "publication_date": result[8],
+        "is_analyzed": result[9],
         "applicants": [],
         "description": [],
         "claims": []
@@ -226,7 +228,7 @@ def get_full_patent_by_number(number: str) -> dict:
 
     # Fetch the claims from the database
     fetch_claims_query = """
-    SELECT claim_number, claim_text, patent_number
+    SELECT claim_number, claim_text, patent_number, sdg
     FROM patent_claim
     WHERE patent_number = %s;
     """
@@ -237,13 +239,14 @@ def get_full_patent_by_number(number: str) -> dict:
         patent["claims"].append({
             "claim_number": claim[0],
             "claim_text": claim[1],
-            "patent_number": claim[2]
+            "patent_number": claim[2],
+            "sdg": claim[3]
         })
     cursor.close()
 
     # Fetch the description from the database
     fetch_description_query = """
-    SELECT description_number, description_text, patent_number
+    SELECT description_number, description_text, patent_number, sdg
     FROM patent_description
     WHERE patent_number = %s;
     """
@@ -254,7 +257,8 @@ def get_full_patent_by_number(number: str) -> dict:
         patent["description"].append({
             "description_number": description[0],
             "description_text": description[1],
-            "patent_number": description[2]
+            "patent_number": description[2],
+            "sdg": description[3]
         })
     cursor.close()
 
@@ -307,6 +311,7 @@ def get_all_patents(first: int = 1, last: int = 100) -> dict:
                     "de_abstract": "Patentzusammenfassung auf Deutsch",
                     "country": "US",
                     "publication_date": "2023-01-01",
+                    "is_analyzed": False,
                     "applicants": [
                         {"name": "Applicant Name", "patent_number": "US1234567"}
                     ]
@@ -334,7 +339,7 @@ def get_all_patents(first: int = 1, last: int = 100) -> dict:
 
     # Fetch the patent data from the database
     fetch_patent_query = """
-    SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date 
+    SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date, patent.is_analyzed 
     FROM patent
     ORDER BY patent.publication_date DESC
     LIMIT %s OFFSET %s;
@@ -361,6 +366,7 @@ def get_all_patents(first: int = 1, last: int = 100) -> dict:
             "de_abstract": result[6],
             "country": result[7],
             "publication_date": result[8],
+            "is_analyzed": result[9],
             "applicants": [],
         })
 
@@ -419,6 +425,7 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
                     "de_abstract": "Patentzusammenfassung auf Deutsch",
                     "country": "US",
                     "publication_date": "2023-01-01",
+                    "is_analyzed": False,
                     "applicants": [
                         {"name": "Applicant Name", "patent_number": "US1234567"}
                     ]
@@ -438,7 +445,7 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
 
     # Fetch the patent data from the database
     fetch_patent_query = """
-    SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date
+    SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date, patent.is_analyzed
     FROM patent
     JOIN patent_applicant ON patent.number = patent_applicant.patent_number
     WHERE LOWER(patent_applicant.applicant_name) = LOWER(%s)
@@ -466,6 +473,7 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
             "de_abstract": result[6],
             "country": result[7],
             "publication_date": result[8],
+            "is_analyzed": result[9],
             "applicants": [],
         })
 
