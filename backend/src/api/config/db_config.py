@@ -1,7 +1,7 @@
 import psycopg2
 import os
-from backend.config.logging_config import logger
-from backend.config.config import load_config
+from api.config.logging_config import logger
+from api.config.config import load_config
 
 
 def get_db_connection():

@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.resources import patent_resource
+from api.resources import patent_resource
 
 
 tags_metadata = [
@@ -60,7 +60,7 @@ def main():
     This function starts the FastAPI application.
     """
     uvicorn.run(
-        "backend.main:app", host="0.0.0.0", port=8000
+        "api.main:app", host="0.0.0.0", port=8000
     )
 
 
@@ -69,5 +69,5 @@ def dev():
     Start the development server with hot reload.
     """
     uvicorn.run(
-        "backend.main:app", host="127.0.0.1", port=8000, reload=True
+        "api.main:app", host="127.0.0.1", port=8000, reload=True
     )

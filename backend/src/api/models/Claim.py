@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class Claim(BaseModel):
@@ -8,3 +9,5 @@ class Claim(BaseModel):
                                description="The unique identifier for the patent.", examples=["EP0000000"])
     claim_text: str = Field(..., title="Claim Text",
                             description="The text of the claim.", examples=["A method for processing data."])
+    sdg: Optional[str] = Field(..., title="SDG",
+                               description="The SDG of the description.", examples=["SDG 1: No Poverty"])

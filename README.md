@@ -40,12 +40,12 @@ docker compose up postgres -d
 Create `config.yaml` file copy from `config-example.yaml` and fill in the values.
 ```bash
 cd backend
-cp src/backend/config/config-example.yaml src/backend/config/config.yaml
+cp src/api/config/config-example.yaml src/api/config/config.yaml
 ```
 
 :warning: This will drop all existing data in the database. :warning:
 ```bash
-poetry run python3 -m src.backend.init_db
+poetry run python3 -m src.api.init_db
 ```
 
 Download the `db.sql` file. Then run the `psql` command to import the data into the database:

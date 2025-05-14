@@ -25,7 +25,7 @@ poetry install
 
 :warning: This will drop all existing data in the database. :warning:
 ```bash
-poetry run python3 -m src.backend.init_db
+poetry run python3 -m src.api.init_db
 ```
 
 1. Run the application:
