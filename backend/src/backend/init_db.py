@@ -1,4 +1,4 @@
-from backend.config.config import get_db_connection
+from backend.config.db_config import get_db_connection
 from backend.config.logging_config import logger
 
 
