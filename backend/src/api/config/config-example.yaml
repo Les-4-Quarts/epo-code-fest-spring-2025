@@ -10,5 +10,9 @@ database:
   user: user
   password: password
 
+ai:
+  host: localhost:11434
+  model: "qwen2.5:7b"
+
 logging:
   level: INFO

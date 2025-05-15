@@ -6,7 +6,7 @@ authors = [
     {name = "RolletQuentin",email = "rolletquen@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13, <4.0"
 dependencies = [
     "fastapi[standard] (>=0.115.12,<0.116.0)",
     "python-dotenv (>=1.1.0,<2.0.0)",
@@ -28,6 +28,9 @@ ipykernel = "^6.29.5"
 ipywidgets = "^8.1.6"
 jupyterlab = "^4.4.1"
 jupyter = "^1.1.1"
+transformers = "^4.51.3"
+torch = "^2.7.0"
+ollama = "^0.4.8"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
