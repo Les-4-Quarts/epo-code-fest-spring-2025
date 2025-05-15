@@ -553,20 +553,16 @@ def update_full_patent(patent: dict) -> None:
     WHERE number = %s;
     """
 
-    # Extract the title and abstract in different languages
-    title = patent.get("title", {})
-    abstract = patent.get("abstract", {})
-
     cursor.execute(update_patent_query, (
-        title.get("en") if title.get("en") else None,
-        title.get("fr") if title.get("fr") else None,
-        title.get("de") if title.get("de") else None,
-        abstract.get("en") if abstract.get("en") else None,
-        abstract.get("fr") if abstract.get("fr") else None,
-        abstract.get("de") if abstract.get("de") else None,
+        patent["en_title"],
+        patent["fr_title"],
+        patent["de_title"],
+        patent["en_abstract"],
+        patent["fr_abstract"],
+        patent["de_abstract"],
         patent["country"],
-        patent["publicationDate"],
-        patent["isAnalyzed"],
+        patent["publication_date"],
+        patent["is_analyzed"],
         number
     ))
 
@@ -578,22 +574,14 @@ def update_full_patent(patent: dict) -> None:
         WHERE claim_number = %s AND patent_number = %s;
         """
 
-        # Claim example: "1. A method for processing..."
-
-        # Extract the claim number and text
-        claim_number = claim.split(".")[0].strip()
-        # Skip the number (one or two digits) and the dot
-        claim_text = claim[len(claim_number)+1:].strip()
-
         cursor.execute(update_claim_query, (
-            claim_text,
+            claim["claim_text"],
             claim["sdg"],
-            int(claim_number),
+            int(claim["claim_number"]),
             number
         ))
 
     conn.commit()
-    cursor.close()
 
     # Update description in the patent_description table
     for description in patent["description"]:
@@ -603,26 +591,24 @@ def update_full_patent(patent: dict) -> None:
         WHERE description_number = %s AND patent_number = %s;
         """
 
-        # Description example: "TECHNICAL FIELD",
-        # Description example: "[0001]    The disclosure relates to the..."
-
-        # Extract the claim number and text. We want only descriptions starting with [xxxx].
-
-        if not description.startswith("["):
-            continue
-
-        # Skip the [ and the last ]
-        description_number = description[1:5].strip()
-        description_text = description[6:].strip()
-
         cursor.execute(update_description_query, (
-            description_text,
-            int(description_number),
+            description["description_text"],
+            description["sdg"],
+            int(description["description_number"]),
             number
         ))
     conn.commit()
-    cursor.close()
+
     # Close the database connection
+    cursor.close()
     conn.close()
     logger.debug(
         f"Patent data updated successfully for number: {number}")
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+
+    # Test update_full_patent
+    patent_data = get_full_patent_by_number("EP4516865A2")
+    update_full_patent(patent_data)
