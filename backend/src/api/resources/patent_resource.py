@@ -140,8 +140,8 @@ async def get_all_patents_by_applicant(
     return patents
 
 
-@router.post("/analyze", response_model=list[Analysis])
-async def analyze_patent_pdf(pdf_file: UploadFile) -> list[Analysis]:
+@router.post("/analyze", response_model=Analysis)
+async def analyze_patent_pdf(pdf_file: UploadFile) -> Analysis:
     """
     Analyze a patent PDF and extract relevant information.
 

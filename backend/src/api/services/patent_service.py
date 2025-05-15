@@ -129,7 +129,7 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
     return []
 
 
-def analyze_patent_pdf(pdf_file: UploadFile) -> list[Analysis]:
+def analyze_patent_pdf(pdf_file: UploadFile) -> Analysis:
     """
     Analyze a patent PDF file and return the analysis results.
 
@@ -137,13 +137,25 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[Analysis]:
         pdf_file (UploadFile): The PDF file to analyze.
 
     Returns:
-        list[Analysis]: A list of analysis results.
+        Analysis: The analysis results containing text and SDG classification.
     """
     logger.debug(f"Analyzing patent PDF file: {pdf_file.filename}")
 
     # Call the repository function to analyze the patent PDF
     # TODO: Implement the actual analysis logic
-    analysis_results = [
+    sdg_summary = [
+        {
+            "patent_number": "EP0000000",
+            "sdg": "SDG 1: No Poverty",
+            "sdg_description": "This patent relates to..."
+        },
+        {
+            "patent_number": "EP0000001",
+            "sdg": "SDG 2: Zero Hunger",
+            "sdg_description": "This patent relates to..."
+        }
+    ]
+    classified_description = [
         {
             "text": "This is a sample text to analyze.",
             "sdg": "SDG 1: No Poverty"
@@ -153,9 +165,13 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[Analysis]:
             "sdg": "SDG 2: Zero Hunger"
         }
     ]
+    analysis_results = {
+        "classified_description": classified_description,
+        "sdg_summary": sdg_summary
+    }
 
     if analysis_results:
-        return [Analysis(**result) for result in analysis_results]
+        return Analysis(**analysis_results)
 
     logger.warning("No analysis results found.")
     return []
