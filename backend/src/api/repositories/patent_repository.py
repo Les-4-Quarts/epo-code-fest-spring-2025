@@ -526,12 +526,11 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
     }
 
 
-def update_full_patent_by_number(patent: dict) -> None:
+def update_full_patent(patent: dict) -> None:
     """
     Update patent data in the PostgreSQL database.
 
     Args:
-        number (str): The patent number.
         patent (dict): A dictionary containing updated patent data.
 
     Returns:
