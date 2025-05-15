@@ -145,24 +145,107 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> Analysis:
     # TODO: Implement the actual analysis logic
     sdg_summary = [
         {
-            "patent_number": "EP0000000",
-            "sdg": "SDG 1: No Poverty",
-            "sdg_description": "This patent relates to..."
+            "patent_number": "EP1234567",
+            "sdg": "SDG 3: Good Health and Well-being",
+            "sdg_description": "This patent focuses on innovative healthcare solutions, including advanced medical devices, improved drug delivery systems, and technologies aimed at enhancing global health outcomes."
         },
         {
-            "patent_number": "EP0000001",
-            "sdg": "SDG 2: Zero Hunger",
-            "sdg_description": "This patent relates to..."
+            "patent_number": "EP2345678",
+            "sdg": "SDG 7: Affordable and Clean Energy",
+            "sdg_description": "This patent addresses the development of sustainable energy technologies, including renewable energy systems, energy storage solutions, and energy-efficient designs for a cleaner future."
+        },
+        {
+            "patent_number": "EP3456789",
+            "sdg": "SDG 13: Climate Action",
+            "sdg_description": "This patent focuses on combating climate change through innovative environmental technologies, such as carbon capture, sustainable materials, and solutions for reducing greenhouse gas emissions."
         }
     ]
+
     classified_description = [
+        # SDG 3: 3 examples
         {
-            "text": "This is a sample text to analyze.",
-            "sdg": "SDG 1: No Poverty"
+            "text": "A revolutionary vaccine platform that enables rapid development and distribution of vaccines for emerging infectious diseases, ensuring timely responses to global health crises.",
+            "sdg": "SDG 3: Good Health and Well-being"
         },
         {
-            "text": "Another sample text for analysis.",
-            "sdg": "SDG 2: Zero Hunger"
+            "text": "An AI-powered wearable device that continuously monitors patient vitals, predicts potential health risks, and provides real-time alerts to healthcare providers.",
+            "sdg": "SDG 3: Good Health and Well-being"
+        },
+        {
+            "text": "A telemedicine platform that leverages high-speed internet and AI diagnostics to provide remote healthcare services to underserved communities.",
+            "sdg": "SDG 3: Good Health and Well-being"
+        },
+
+        # SDG 7: 7 examples
+        {
+            "text": "A next-generation solar panel system that integrates nanotechnology to significantly increase energy conversion efficiency and reduce production costs.",
+            "sdg": "SDG 7: Affordable and Clean Energy"
+        },
+        {
+            "text": "A modular wind turbine design optimized for urban environments, enabling clean energy generation in densely populated areas.",
+            "sdg": "SDG 7: Affordable and Clean Energy"
+        },
+        {
+            "text": "A breakthrough in hydrogen fuel cell technology that enhances energy storage capacity and reduces dependency on fossil fuels.",
+            "sdg": "SDG 7: Affordable and Clean Energy"
+        },
+        {
+            "text": "An innovative energy management system that uses AI to optimize energy consumption in smart homes and reduce electricity bills.",
+            "sdg": "SDG 7: Affordable and Clean Energy"
+        },
+        {
+            "text": "A portable solar-powered water desalination unit designed to provide clean drinking water in remote and disaster-stricken areas.",
+            "sdg": "SDG 7: Affordable and Clean Energy"
+        },
+        {
+            "text": "A high-capacity battery storage system for renewable energy grids, ensuring stable energy supply during peak demand periods.",
+            "sdg": "SDG 7: Affordable and Clean Energy"
+        },
+        {
+            "text": "A bio-inspired cooling system for solar panels that increases efficiency by maintaining optimal operating temperatures.",
+            "sdg": "SDG 7: Affordable and Clean Energy"
+        },
+
+        # SDG 13: 10 examples
+        {
+            "text": "A carbon capture and storage technology that efficiently removes CO2 from industrial emissions and stores it safely underground.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A biodegradable alternative to traditional plastics, reducing environmental pollution and promoting sustainable packaging solutions.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A drone-based system for monitoring deforestation and providing actionable insights to promote reforestation efforts.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A smart irrigation system powered by renewable energy that optimizes water usage in agriculture, reducing waste and improving crop yields.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A thermal insulation material made from recycled waste, designed to improve energy efficiency in buildings and reduce carbon footprints.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A marine ecosystem restoration technology that uses artificial reefs to combat ocean acidification and promote biodiversity.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A predictive analytics tool for assessing the impact of climate change on urban infrastructure and guiding sustainable development.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A renewable energy-powered air purification system that reduces urban air pollution and improves public health.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A blockchain-based platform for tracking carbon credits and incentivizing businesses to adopt sustainable practices.",
+            "sdg": "SDG 13: Climate Action"
+        },
+        {
+            "text": "A water purification system that uses solar energy to provide clean drinking water in regions affected by climate change-induced droughts.",
+            "sdg": "SDG 13: Climate Action"
         }
     ]
     analysis_results = {
