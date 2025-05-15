@@ -22,7 +22,7 @@ def create_sdg_summary(sdg_summary: dict):
     insert_sdg_summary_query = """
     INSERT INTO patent_sdg_summary (patent_number, sdg, sdg_description)
     VALUES (%s, %s, %s)
-    ON CONFLICT (patent_number) DO NOTHING;
+    ON CONFLICT (patent_number, sdg) DO NOTHING;
     """
 
     cursor.execute(insert_sdg_summary_query, (
@@ -78,3 +78,22 @@ def get_sdg_summary_by_patent_number(patent_number: str) -> list:
         f"SDG summary data retrieved successfully for patent number: {patent_number}")
 
     return sdg_summary_list
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+    # Example usage
+    sdg_summary_data = [{
+        "patent_number": "EP4516865A2",
+        "sdg": "SDG 1: No Poverty",
+        "sdg_description": "This patent relates to a method for providing financial assistance to low-income individuals."
+    },
+        {
+        "patent_number": "EP4516865A2",
+        "sdg": "SDG 2: Zero Hunger",
+        "sdg_description": "This patent relates to a method for improving agricultural productivity."
+    }]
+    for sdg_summary in sdg_summary_data:
+        create_sdg_summary(sdg_summary)
+    summary = get_sdg_summary_by_patent_number("EP4516865A2")
+    pprint(summary)
