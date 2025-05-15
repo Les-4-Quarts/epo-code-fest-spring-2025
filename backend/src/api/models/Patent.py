@@ -4,6 +4,7 @@ from typing import Optional, List
 from api.models.Claim import Claim
 from api.models.Description import Description
 from api.models.Applicant import Applicant
+from api.models.SDGSummary import SDGSummary
 
 
 class Patent(BaseModel):
@@ -36,6 +37,8 @@ class FullPatent(Patent):
         [], title="Descriptions", description="The descriptions of the patent.")
     claims: List[Claim] = Field(
         [], title="Claims", description="The claims of the patent.")
+    sdg_summary: List[SDGSummary] = Field(
+        [], title="SDG Summary", description="The SDG summary of the patent.")
 
     model_config = {
         "json_schema_extra": {
@@ -50,25 +53,34 @@ class FullPatent(Patent):
                     "de_abstract": "Dies ist ein Beispiel-Abstract",
                     "country": "FR",
                     "publication_date": "20230104",
+                    "applicants": [
+                        {
+                            "name": "John Doe",
+                            "patent_number": "EP0000000"
+                        }
+                    ],
                     "is_analyzed": False,
                     "description": [
                         {
                             "description_number": 1,
                             "patent_number": "EP0000000",
-                            "description_text": "[0001] The disclosure relates to the..."
+                            "description_text": "[0001] The disclosure relates to the...",
+                            "sdg": None
                         }
                     ],
                     "claims": [
                         {
                             "claim_number": 1,
                             "patent_number": "EP0000000",
-                            "claim_text": "[0001] A method for processing data."
+                            "claim_text": "[0001] A method for processing data.",
+                            "sdg": None
                         }
                     ],
-                    "applicants": [
+                    "sdg_summary": [
                         {
-                            "name": "John Doe",
-                            "patent_number": "EP0000000"
+                            "patent_number": "EP0000000",
+                            "sdg": "SDG 1: No Poverty",
+                            "sdg_description": "This patent relates to..."
                         }
                     ]
                 }

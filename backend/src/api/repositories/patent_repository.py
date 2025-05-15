@@ -221,7 +221,8 @@ def get_full_patent_by_number(number: str) -> dict:
         "is_analyzed": result[9],
         "applicants": [],
         "description": [],
-        "claims": []
+        "claims": [],
+        "sdg_summary": []
     }
 
     cursor.close()
@@ -275,6 +276,23 @@ def get_full_patent_by_number(number: str) -> dict:
         patent["applicants"].append({
             "name": applicant[0],
             "patent_number": applicant[1]
+        })
+    cursor.close()
+
+    # Fetch the SDG summary from the database
+    select_sdg_summary_query = """
+    SELECT patent_number, sdg, sdg_description
+    FROM patent_sdg_summary
+    WHERE patent_number = %s;
+    """
+    cursor = conn.cursor()
+    cursor.execute(select_sdg_summary_query, (number,))
+    sdg_summary_list = cursor.fetchall()
+    for sdg_summary in sdg_summary_list:
+        patent["sdg_summary"].append({
+            "patent_number": sdg_summary[0],
+            "sdg": sdg_summary[1],
+            "sdg_description": sdg_summary[2]
         })
     cursor.close()
 
@@ -506,3 +524,106 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
         "last": min(last, len(patents)),
         "total_results": len(patents)
     }
+
+
+def update_full_patent_by_number(patent: dict) -> None:
+    """
+    Update patent data in the PostgreSQL database.
+
+    Args:
+        number (str): The patent number.
+        patent (dict): A dictionary containing updated patent data.
+
+    Returns:
+        None
+    """
+    number = patent["number"]
+    if not number:
+        logger.error("Patent number is required for update.")
+        return
+
+    logger.debug(f"Updating patent data for number: {number}")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Update patent data in the database
+    update_patent_query = """
+    UPDATE patent
+    SET en_title = %s, fr_title = %s, de_title = %s, en_abstract = %s, fr_abstract = %s, de_abstract = %s, country = %s, publication_date = %s, is_analyzed = %s
+    WHERE number = %s;
+    """
+
+    # Extract the title and abstract in different languages
+    title = patent.get("title", {})
+    abstract = patent.get("abstract", {})
+
+    cursor.execute(update_patent_query, (
+        title.get("en") if title.get("en") else None,
+        title.get("fr") if title.get("fr") else None,
+        title.get("de") if title.get("de") else None,
+        abstract.get("en") if abstract.get("en") else None,
+        abstract.get("fr") if abstract.get("fr") else None,
+        abstract.get("de") if abstract.get("de") else None,
+        patent["country"],
+        patent["publicationDate"],
+        patent["isAnalyzed"],
+        number
+    ))
+
+    # Update claims in the patent_claim table
+    for claim in patent["claims"]:
+        update_claim_query = """
+        UPDATE patent_claim
+        SET claim_text = %s, sdg = %s
+        WHERE claim_number = %s AND patent_number = %s;
+        """
+
+        # Claim example: "1. A method for processing..."
+
+        # Extract the claim number and text
+        claim_number = claim.split(".")[0].strip()
+        # Skip the number (one or two digits) and the dot
+        claim_text = claim[len(claim_number)+1:].strip()
+
+        cursor.execute(update_claim_query, (
+            claim_text,
+            claim["sdg"],
+            int(claim_number),
+            number
+        ))
+
+    conn.commit()
+    cursor.close()
+
+    # Update description in the patent_description table
+    for description in patent["description"]:
+        update_description_query = """
+        UPDATE patent_description
+        SET description_text = %s, sdg = %s
+        WHERE description_number = %s AND patent_number = %s;
+        """
+
+        # Description example: "TECHNICAL FIELD",
+        # Description example: "[0001]    The disclosure relates to the..."
+
+        # Extract the claim number and text. We want only descriptions starting with [xxxx].
+
+        if not description.startswith("["):
+            continue
+
+        # Skip the [ and the last ]
+        description_number = description[1:5].strip()
+        description_text = description[6:].strip()
+
+        cursor.execute(update_description_query, (
+            description_text,
+            int(description_number),
+            number
+        ))
+    conn.commit()
+    cursor.close()
+    # Close the database connection
+    conn.close()
+    logger.debug(
+        f"Patent data updated successfully for number: {number}")
