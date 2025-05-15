@@ -12,7 +12,7 @@ database:
 
 ai:
   host: localhost:11434
-  model: "qwen2.5:7b"
+  model: "qwen2.5:1.5b"
 
 logging:
   level: INFO
