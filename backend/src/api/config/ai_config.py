@@ -43,6 +43,7 @@ def get_ai_config():
     ai_config = config.get('ai', {})
     ai_host = ai_config.get('host')
     ai_model = ai_config.get('model')
+    ai_huggingface_token = ai_config.get('huggingface_token')
 
     if not ai_host or not ai_model:
         raise ValueError(
@@ -51,8 +52,8 @@ def get_ai_config():
     logger.debug(f"Loaded AI configuration: host={ai_host}, model={ai_model}")
 
     ai_client = get_ai_client(ai_host)
-    return ai_host, ai_model, ai_client
+    return ai_host, ai_model, ai_client, ai_huggingface_token
 
 
 # Initialize the AI client on module load
-ai_host, ai_model, ai_client = get_ai_config()
+ai_host, ai_model, ai_client, ai_huggingface_token = get_ai_config()
