@@ -304,7 +304,7 @@ def get_full_patent_by_number(number: str) -> dict:
     return patent
 
 
-def get_all_patents(first: int = 1, last: int = 100) -> dict:
+def get_all_patents(first: int = 0, last: int = 100) -> dict:
     """
     Get all patents from the PostgreSQL database order by publication date.
 
@@ -364,7 +364,7 @@ def get_all_patents(first: int = 1, last: int = 100) -> dict:
     """
 
     cursor = conn.cursor()
-    cursor.execute(fetch_patent_query, (last, first))
+    cursor.execute(fetch_patent_query, (last - first, first))
     results = cursor.fetchall()
     cursor.close()
 
