@@ -162,3 +162,28 @@ async def analyze_patent_pdf(pdf_file: UploadFile) -> Analysis:
             status_code=500, detail="Error analyzing patent PDF.")
 
     return analysis_result
+
+
+@router.get("/analyze/{patent_number}", response_model=Analysis)
+async def analyze_patent_by_number(patent_number: str) -> Analysis:
+    """
+    Analyze a patent by patent number and extract relevant information.
+
+    Args:
+        patent_number (str): The patent number to analyze.
+
+    Returns:
+        dict: Extracted information from the patent PDF.
+    """
+    logger.debug("Analyzing patent PDF.")
+
+    # Call the service function to analyze the PDF
+    try:
+        analysis_result = patent_service.analyze_patent_by_number(
+            patent_number)
+    except Exception as e:
+        logger.error(f"Error analyzing patent PDF: {e}")
+        raise HTTPException(
+            status_code=500, detail="Error analyzing patent PDF.")
+
+    return analysis_result
