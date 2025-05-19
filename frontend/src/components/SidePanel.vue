@@ -21,6 +21,7 @@ const activeTab = computed(() => {
 })
 
 import { useRouter } from 'vue-router'
+import SelectInput from './Fields/SelectInput.vue'
 const router = useRouter()
 
 function changeLanguage(event: Event) {
@@ -60,11 +61,17 @@ defineProps({
       />
     </div>
     <div class="footer">
-      <select class="language-selector" @change="changeLanguage">
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-        <option value="de">Deutsch</option>
-      </select>
+      <SelectInput
+        class="language-selector"
+        :options="[
+          { label: 'English', value: 'en' },
+          { label: 'Français', value: 'fr' },
+          { label: 'Deutsch', value: 'de' },
+        ]"
+        orientation="top"
+        width="72px"
+        v-model="locale"
+      />
       <SvgIcon
         class="theme-icon"
         :path="themeStore.isDarkTheme ? mdiWeatherSunny : mdiWeatherNight"
@@ -97,6 +104,10 @@ defineProps({
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
 
+  transition:
+    background-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
+
   background-color: var(--neutral-lower);
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 
@@ -126,20 +137,11 @@ defineProps({
   .footer {
     display: flex;
     padding: 10px;
+    align-items: center;
 
     .theme-icon {
       cursor: pointer;
       margin-left: auto;
-    }
-
-    .language-selector {
-      margin-left: 10px;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #fff;
-      color: #000;
-      font-size: 14px;
     }
   }
 }

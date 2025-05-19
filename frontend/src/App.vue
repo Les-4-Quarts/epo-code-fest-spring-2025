@@ -30,6 +30,10 @@ const componentKey = ref(Date.now())
   background-color: var(--neutral-lowest);
   color: var(--neutral-hightest);
 
+  transition:
+    background-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
+
   // Background image
   background-image: url('@/assets/images/background.svg');
   background-repeat: no-repeat;
