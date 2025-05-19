@@ -14,6 +14,7 @@ dependencies = [
     "psycopg2-binary (>=2.9.10,<3.0.0)",
     "pydantic (>=2.11.4,<3.0.0)",
     "pyyaml (>=6.0.2,<7.0.0)",
+    "polars (>=1.29.0,<2.0.0)",
 ]
 
 [tool.poetry]
@@ -28,6 +29,7 @@ ipykernel = "^6.29.5"
 ipywidgets = "^8.1.6"
 jupyterlab = "^4.4.1"
 jupyter = "^1.1.1"
+googletrans = "^4.0.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
