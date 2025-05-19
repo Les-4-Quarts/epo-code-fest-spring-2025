@@ -227,6 +227,7 @@ function cssvar(name: string) {
   .analyze-card {
     width: 412px;
     height: 504px;
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 
     .content {
       width: 100%;
@@ -261,9 +262,8 @@ function cssvar(name: string) {
         }
       }
     }
-
     &:hover {
-      scale: 105%;
+      transform: scale(105%);
       cursor: pointer;
     }
   }

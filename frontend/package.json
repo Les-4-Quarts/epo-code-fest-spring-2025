@@ -17,9 +17,12 @@
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/js": "^7.4.47",
+    "@vue-leaflet/vue-leaflet": "^0.10.1",
     "chart.js": "^4.4.9",
+    "country-code-switch": "^1.0.1",
     "d3": "^7.9.0",
     "pinia": "^3.0.1",
+    "topojson-client": "^3.1.0",
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.2",
     "vue-i18n": "^10.0.7",

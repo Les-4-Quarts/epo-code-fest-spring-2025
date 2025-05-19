@@ -129,14 +129,18 @@ button {
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+
 
   .icon {
-    // margin-left: -5px;
-    // margin-right: 5px;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
 
     &.icon-with-text {
       margin-left: -5px;
       margin-right: 5px;
+      // Ca ne sert à rien
     }
   }
 

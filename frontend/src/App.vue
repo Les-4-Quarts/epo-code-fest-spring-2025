@@ -40,6 +40,7 @@ const componentKey = ref(Date.now())
   background-size: 150%;
   background-position: center;
   background-attachment: fixed;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
 .page {

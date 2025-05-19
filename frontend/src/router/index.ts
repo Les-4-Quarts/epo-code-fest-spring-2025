@@ -17,7 +17,7 @@ const router = createRouter({
     {
       path: '/explore',
       name: 'explore',
-      component: () => import('../views/HomeView.vue')
+      component: () => import('../views/ExploreView.vue')
     },
     {
       path: '/search-applicant',
