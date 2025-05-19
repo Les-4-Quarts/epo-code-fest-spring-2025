@@ -1,9 +1,9 @@
 <template>
   <div class="explore-container">
-   <div class="explore-content">
+    <div class="explore-content">
       <div class="map-section">
         <div class="map-wrapper">
-          <MapODD ref="mapODD"/>
+          <MapODD ref="mapODD" />
         </div>
       </div>
     </div>
@@ -13,12 +13,12 @@
 <script>
 // import { ref, onMounted } from 'vue';
 // import { useRouter } from 'vue-router';
-import MapODD from '@/components/Map/MapODD.vue';
+import MapODD from '@/components/Map/MapODD.vue'
 
 export default {
   name: 'ExploreView',
   components: {
-    MapODD
+    MapODD,
   },
   // setup() {
   //   const router = useRouter();
@@ -121,14 +121,13 @@ export default {
   //     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
   //   }
   // }
-};
+}
 </script>
 
 <style scoped>
 .explore-container {
   width: 100%;
   max-width: 1400px;
-  height: 100%;
   margin: 0 auto;
   padding: 20px;
 }
