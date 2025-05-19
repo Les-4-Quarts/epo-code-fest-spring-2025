@@ -413,21 +413,9 @@ const toggleSelection = (n) => {
       </div>
     </div>
   </div>
-
-  <div class="list-container">
-    <BasicCard class="analyze-card"> </BasicCard>
-  </div>
 </template>
 
 <style scoped>
-.list-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 50px;
-  height: calc(82vh - (142px * 2));
-  width: 100%;
-}
 .analyze-card {
   width: 80%;
   height: 100%;
