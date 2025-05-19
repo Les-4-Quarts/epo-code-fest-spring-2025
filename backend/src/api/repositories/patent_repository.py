@@ -341,12 +341,12 @@ def get_all_patents(first: int = 1, last: int = 100) -> dict:
     fetch_patent_query = """
     SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date, patent.is_analyzed 
     FROM patent
-    ORDER BY patent.publication_date DESC
+    ORDER BY patent.publication_date DESC, patent.number ASC
     LIMIT %s OFFSET %s;
     """
 
     cursor = conn.cursor()
-    cursor.execute(fetch_patent_query, (last, first))
+    cursor.execute(fetch_patent_query, (last - first, first))
     results = cursor.fetchall()
     cursor.close()
 
