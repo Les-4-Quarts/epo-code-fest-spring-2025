@@ -15,6 +15,11 @@ const props = defineProps({
     required: false,
     default: 'text',
   },
+  width: {
+    type: String,
+    required: false,
+    default: '250px',
+  },
   icon: {
     type: String,
     required: false,
@@ -90,9 +95,12 @@ const clearInput = () => {
         :type="type"
         @focus="inputFocused = true"
         @blur="handleBlur"
+        :style="{
+          width: `calc(${props.width} - ${props.iconSize * (iconPath ? 1 : 0)}px - ${props.iconSize * (deleteOption ? 1 : 0)}px)`,
+        }"
       />
       <SvgIcon
-        v-if="deleteOption && inputFocused && model"
+        v-if="deleteOption && model"
         :path="mdiClose"
         type="mdi"
         class="input-icon close-icon"
@@ -120,7 +128,6 @@ div {
     flex-direction: row;
     padding: 5px;
     border-radius: 7px;
-    width: 300px;
 
     &:focus-within {
       background-color: var(--neutral-low-opacity);
