@@ -23,6 +23,9 @@ packages = [{include = "api", from = "src"}]
 start = "api.main:main"
 dev = "api.main:dev"
 
+[tool.poetry.group.dev]
+optional = true
+
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
 ipywidgets = "^8.1.6"
@@ -32,6 +35,8 @@ transformers = "^4.51.3"
 torch = "^2.7.0"
 ollama = "^0.4.8"
 langdetect = "^1.0.9"
+polars = "^1.29.0"
+googletrans = "^4.0.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
