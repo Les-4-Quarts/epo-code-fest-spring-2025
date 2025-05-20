@@ -40,6 +40,15 @@ const props = defineProps({
   flex-direction: column;
   width: 113px;
   height: 107px;
+  transition:
+    background-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
+
+  ::v-deep(.icon){
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+  }
 
   ::v-deep(.text) {
     font-size: 15px;

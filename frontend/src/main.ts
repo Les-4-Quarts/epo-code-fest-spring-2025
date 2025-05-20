@@ -24,7 +24,6 @@ ChartJS.register(
     LinearScale
 )
 
-
 const app = createApp(App)
 registerPlugins(app)
 app.use(router)

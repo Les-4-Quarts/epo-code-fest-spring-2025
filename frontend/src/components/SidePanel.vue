@@ -101,7 +101,7 @@ defineProps({
   padding: var(--vertical-padding) var(--horizontal-padding);
   left: calc(-1 * var(--width)); /* Hidden by default */
   transform: translateX(0);
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, color 0.3s ease-in-out;
   z-index: 1000;
 
   transition:
@@ -122,6 +122,7 @@ defineProps({
       font-size: 64px;
       font-weight: 800;
       color: var(--neutral-hightest);
+      transition: color 0.3s ease-in-out;
     }
   }
 

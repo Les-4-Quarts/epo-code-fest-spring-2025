@@ -30,6 +30,8 @@ class Patent(BaseModel):
         [], title="Applicants", description="The applicants of the patent.")
     is_analyzed: Optional[bool] = Field(
         False, title="Is Analyzed", description="Indicates if the patent has been analyzed.", examples=[False])
+    sdgs: List[Optional[str]] = Field(
+        [], title="SDGs", description="The SDGs associated with the patent.", examples=["1", "14", "17"])
 
 
 class FullPatent(Patent):

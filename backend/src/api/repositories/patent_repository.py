@@ -386,6 +386,7 @@ def get_all_patents(first: int = 0, last: int = 100) -> dict:
             "publication_date": result[8],
             "is_analyzed": result[9],
             "applicants": [],
+            "sdgs": [],
         })
 
         # Fetch the applicants for each patent
@@ -403,6 +404,25 @@ def get_all_patents(first: int = 0, last: int = 100) -> dict:
                 "patent_number": applicant[1]
             })
         cursor.close()
+
+        # Fetch the SDGs for each patent
+        fetch_sdgs_query = """
+        SELECT DISTINCT sdg
+        FROM patent_description
+        WHERE patent_number = %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(fetch_sdgs_query, (result[0],))
+        sdgs = cursor.fetchall()
+
+
+        for sdg in sdgs:
+            # print(sdg[0])
+            if(sdg[0] != 'None'):
+                patents[-1]["sdgs"].append(sdg[0])
+        cursor.close()
+
+
 
     # Close the database connection
     conn.close()
