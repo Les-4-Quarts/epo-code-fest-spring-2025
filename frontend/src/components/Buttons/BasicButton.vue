@@ -10,7 +10,6 @@ const props = defineProps({
   text: String,
   color: {
     type: String,
-    default: 'black',
   },
   bgColor: {
     type: String,
@@ -129,13 +128,14 @@ button {
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-
-
+  transition:
+    background-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
 
   .icon {
-    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-
+    transition:
+      background-color 0.3s ease-in-out,
+      color 0.3s ease-in-out;
 
     &.icon-with-text {
       margin-left: -5px;

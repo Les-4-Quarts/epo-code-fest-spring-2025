@@ -9,6 +9,6 @@ export type Patent = {
     is_analyzed: boolean;
     number: string;
     publication_date: string;
-    applicatants: String[];
-    sdgs: String[];
+    applicatants: string[];
+    sdgs: string[];
 }
