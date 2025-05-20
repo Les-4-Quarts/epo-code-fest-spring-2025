@@ -6,7 +6,7 @@ const { t } = useI18n()
 // Components
 import BasicCard from '@/components/Cards/BasicCard.vue'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiPlusBox, mdiClose } from '@mdi/js'
+import { mdiPlusBox, mdiClose, mdiArrowLeft } from '@mdi/js'
 import BasicButton from '@/components/Buttons/BasicButton.vue'
 import SpinnerLoader from '@/components/Loaders/SpinnerLoader.vue'
 
@@ -14,48 +14,20 @@ import SpinnerLoader from '@/components/Loaders/SpinnerLoader.vue'
 import { computed, ref } from 'vue'
 import BasicChip from '@/components/Chips/BasicChip.vue'
 import { Doughnut } from 'vue-chartjs'
+import type { Analysis } from '@/types/Analysis'
 const selectedFile = ref<File | null>(null)
-// const analysisResult = ref<any[] | null>(null)
-const analysisResult = ref<any[] | null>([
-  {
-    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 1: No Poverty',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 1: No Poverty',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 3: Good Health and Well-being',
-  },
-
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-  {
-    text: '  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas numquam, libero illum error possimus atque recusandae repellat deserunt ut. Dolor quam at repellat, eveniet unde ex quo voluptatem perferendis esse?',
-    sdg: 'SDG 2: Zero Hunger',
-  },
-])
+const analysisResult = ref<Analysis | null>(null)
 const isLoading = ref(false)
+const sdgSelected = ref('')
+
+const filteredResults = computed(() => {
+  if (!analysisResult.value) {
+    return null
+  }
+  return analysisResult.value.classified_description.filter(
+    (result) => result.sdg === sdgSelected.value,
+  )
+})
 
 const doughnutData = computed(() => {
   if (!analysisResult.value) {
@@ -63,7 +35,7 @@ const doughnutData = computed(() => {
   }
 
   // Retrive all labels from the analysis result. Keep only unique labels
-  const labels = analysisResult.value
+  const labels = analysisResult.value.classified_description
     .map((result) => result.sdg)
     .filter((value, index, self) => self.indexOf(value) === index)
 
@@ -72,7 +44,8 @@ const doughnutData = computed(() => {
     if (!analysisResult.value) {
       return 0
     }
-    return analysisResult.value.filter((result) => result.sdg === label).length
+    return analysisResult.value.classified_description.filter((result) => result.sdg === label)
+      .length
   })
 
   // Generate a color for each label
@@ -146,6 +119,10 @@ function handleFileSend() {
   }
 }
 
+function backResults() {
+  sdgSelected.value = ''
+}
+
 function closeResults() {
   analysisResult.value = null
 }
@@ -179,13 +156,18 @@ function cssvar(name: string) {
 
     <SpinnerLoader v-else-if="isLoading" :size="16" :border-width="1" />
 
-    <BasicCard v-else class="analyze-result-card">
+    <BasicCard v-else-if="!sdgSelected" class="analyze-result-card">
       <div class="content">
         <SvgIcon class="close" type="mdi" :path="mdiClose" @click="closeResults" />
         <h2>{{ $t('analyze.about') }}</h2>
         <div class="results">
           <div class="results-text">
-            <div v-for="(result, index) in analysisResult" :key="index">
+            <div
+              v-for="(result, index) in analysisResult?.sdg_summary"
+              :key="index"
+              @click="sdgSelected = result.sdg"
+              class="result"
+            >
               <BasicChip
                 class="chip"
                 :title="result.sdg"
@@ -193,7 +175,7 @@ function cssvar(name: string) {
                 :bgColor="`var(--${result.sdg.split(':')[0].trim().toLowerCase().replace(' ', '-')})`"
               />
               <p>
-                {{ result.text }}
+                {{ result.sdg_description }}
               </p>
             </div>
           </div>
@@ -209,6 +191,31 @@ function cssvar(name: string) {
                 },
               }"
             />
+          </div>
+        </div>
+      </div>
+    </BasicCard>
+
+    <BasicCard v-else class="analyze-result-card">
+      <div class="content">
+        <SvgIcon class="back" type="mdi" :path="mdiArrowLeft" @click="backResults" />
+        <SvgIcon class="close" type="mdi" :path="mdiClose" @click="closeResults" />
+        <h2>{{ $t('analyze.about') }}</h2>
+        <div class="results">
+          <div class="results-text">
+            <div>
+              <BasicChip
+                class="chip"
+                :title="sdgSelected"
+                color="white"
+                :bgColor="`var(--${sdgSelected.split(':')[0].trim().toLowerCase().replace(' ', '-')})`"
+              />
+            </div>
+            <div v-for="(result, index) in filteredResults" :key="index">
+              <p>
+                {{ result.text }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -252,7 +259,7 @@ function cssvar(name: string) {
 
         span {
           font-size: 20px;
-          font-weight: 600;
+          font-weight: 400;
           text-align: center;
         }
 
@@ -280,15 +287,24 @@ function cssvar(name: string) {
       align-items: center;
       gap: 29px;
 
-      .close {
+      .close,
+      .back {
         position: absolute;
-        top: 20px;
-        right: 20px;
         cursor: pointer;
 
         &:hover {
           scale: 110%;
         }
+      }
+
+      .close {
+        top: 20px;
+        right: 20px;
+      }
+
+      .back {
+        top: 20px;
+        left: 20px;
       }
 
       h2 {
@@ -306,6 +322,10 @@ function cssvar(name: string) {
         gap: 30px;
         padding: 0px 15px;
 
+        .result {
+          cursor: pointer;
+        }
+
         .results-text {
           display: flex;
           flex-direction: column;
@@ -321,7 +341,7 @@ function cssvar(name: string) {
 
           p {
             font-size: 20px;
-            font-weight: 600;
+            font-weight: 400;
           }
         }
 

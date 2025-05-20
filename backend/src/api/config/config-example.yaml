@@ -10,5 +10,10 @@ database:
   user: user
   password: password
 
+ai:
+  host: localhost:11434
+  model: "qwen2.5:1.5b"
+  huggingface_token: <YOUR_HUGGINGFACE_TOKEN>
+
 logging:
   level: INFO

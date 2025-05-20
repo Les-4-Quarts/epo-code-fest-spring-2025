@@ -29,6 +29,15 @@ poetry --version
 cd backend
 poetry install
 ```
+To use a GPU, install the correct version of [pytorch](https://pytorch.org/get-started/locally/).
+```
+poetry run pip install [specific version for your gpu]
+```
+
+#### Run ollama with docker
+```bash
+docker compose up ollama -d
+```
 
 #### Feed the database
 
@@ -42,6 +51,7 @@ Create `config.yaml` file copy from `config-example.yaml` and fill in the values
 cd backend
 cp src/api/config/config-example.yaml src/api/config/config.yaml
 ```
+Add your huggingface_token in the config.yaml.
 
 :warning: This will drop all existing data in the database. :warning:
 ```bash
