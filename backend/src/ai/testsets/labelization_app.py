@@ -116,4 +116,4 @@ if __name__ == "__main__":
     # asyncio.run(label_descriptions("testset_v1_en_raw_pat.jsonl", translate=False))
 
     # Quentin
-    # asyncio.run(label_descriptions("testset_v1_en_raw_quentin.jsonl"))
+    asyncio.run(label_descriptions("testset_v1_en_raw_quentin.jsonl"))
