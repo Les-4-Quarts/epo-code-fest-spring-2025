@@ -415,14 +415,11 @@ def get_all_patents(first: int = 0, last: int = 100) -> dict:
         cursor.execute(fetch_sdgs_query, (result[0],))
         sdgs = cursor.fetchall()
 
-
         for sdg in sdgs:
             # print(sdg[0])
-            if(sdg[0] != 'None'):
+            if (sdg[0] != 'None'):
                 patents[-1]["sdgs"].append(sdg[0])
         cursor.close()
-
-
 
     # Close the database connection
     conn.close()
