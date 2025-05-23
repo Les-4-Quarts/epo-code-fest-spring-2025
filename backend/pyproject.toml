@@ -38,6 +38,10 @@ ollama = "^0.4.8"
 langdetect = "^1.0.9"
 polars = "^1.29.0"
 googletrans = "^4.0.2"
+matplotlib = "^3.10.3"
+seaborn = "^0.13.2"
+scipy = "^1.15.3"
+plotly = "^6.1.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
