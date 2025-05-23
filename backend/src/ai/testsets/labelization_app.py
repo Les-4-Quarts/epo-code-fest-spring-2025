@@ -56,10 +56,12 @@ async def label_descriptions(file_name, translate=True):
         with open(output_file, "r") as f:
             for line in f:
                 item = json.loads(line)
-                already_labeled.add((item["patent_number"], item["description_number"]))
+                already_labeled.add(
+                    (item["patent_number"], item["description_number"]))
 
     # Filter out already labeled descriptions
-    remaining = [d for d in descriptions if (d["patent_number"], d["description_number"]) not in already_labeled]
+    remaining = [d for d in descriptions if (
+        d["patent_number"], d["description_number"]) not in already_labeled]
     total_remaining = len(remaining)
 
     print(f"\nTotal descriptions: {total}")
@@ -84,13 +86,17 @@ async def label_descriptions(file_name, translate=True):
         print(f"[{idx}/{total_remaining}]")
         print(f"Patent Number: {patent_number}")
         print(f"Description Number: {description_number}")
-        print(f"Translated Description:\n{translated_text}")
-        print(f"Predicted SDG: {predicted_sdg}")
+        if translate:
+            print(f"\nDescription:\n{description_text}")
+        print(f"\nTranslated Description:\n{translated_text}")
+        print(f"\nPredicted SDG: {predicted_sdg}")
         print("==============================")
 
         # User input for SDG label
-        sdg_input = input("Enter SDG label (1-17), 0 for None, or press Enter to keep prediction: ").strip()
-        final_sdg = f"SDG{sdg_input}" if sdg_input and sdg_input != "0" else ("None" if sdg_input == "0" else predicted_sdg)
+        sdg_input = input(
+            "Enter SDG label (1-17), 0 for None, or press Enter to keep prediction: ").strip()
+        final_sdg = f"SDG{sdg_input}" if sdg_input and sdg_input != "0" else (
+            "None" if sdg_input == "0" else predicted_sdg)
 
         # Save labeled result
         with open(output_file, "a", encoding="utf-8") as f:
@@ -106,8 +112,8 @@ async def label_descriptions(file_name, translate=True):
 if __name__ == "__main__":
     # Launch manual labeling
 
-    # Patrice    
-    asyncio.run(label_descriptions("testset_v1_en_raw_pat.jsonl", translate=False))
+    # Patrice
+    # asyncio.run(label_descriptions("testset_v1_en_raw_pat.jsonl", translate=False))
 
     # Quentin
-    # asyncio.run(label_descriptions("testset_v1_en_raw_quentin.jsonl"))
+    asyncio.run(label_descriptions("testset_v1_en_raw_quentin.jsonl"))
