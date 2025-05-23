@@ -54,6 +54,27 @@ async def translate_text(translator, text):
         return text
 
 
+def highlight_text(text, search_text):
+    """
+    Highlights the search text in the given text using ANSI escape codes.
+
+    Args:
+        text (str): The text to search within.
+        search_text (str): The text to highlight.
+
+    Returns:
+        str: The text with the search text highlighted in red.
+    """
+    import re
+    # Escape special characters in search_text for regex
+    escaped_search_text = re.escape(search_text)
+    # Replace occurrences of search_text with highlighted version
+    highlighted = re.sub(
+        f"({escaped_search_text})", "\033[91m\\1\033[0m", text, flags=re.IGNORECASE
+    )
+    return highlighted
+
+
 async def label_descriptions_from_db(search_text, translate=True, output_file="labeled_patents.jsonl"):
     """
     Searches for patent descriptions in the database using a keyword and allows the user to manually assign SDG labels.
@@ -107,13 +128,16 @@ async def label_descriptions_from_db(search_text, translate=True, output_file="l
         else:
             translated_text = description_text
 
+        # Highlight the search text in the description
+        highlighted_description = highlight_text(description_text, search_text)
+
         # Display description info
         print("\n==============================")
         print(f"[{idx}/{total_remaining}]")
         print(f"Patent Number: {patent_number}")
         print(f"Description Number: {description_number}")
         if translate:
-            print(f"\nDescription:\n{description_text}")
+            print(f"\nDescription:\n{highlighted_description}")
         print(f"\nTranslated Description:\n{translated_text}")
         print(f"\nPredicted SDG: {predicted_sdg}")
         print("==============================")
@@ -121,6 +145,11 @@ async def label_descriptions_from_db(search_text, translate=True, output_file="l
         # User input for SDG label
         sdg_input = input(
             "Enter SDG label (1-17), 0 for None, or press Enter to keep prediction: ").strip()
+
+        if sdg_input == "n":
+            print("Skipping this description.")
+            continue
+
         final_sdg = f"SDG{sdg_input}" if sdg_input and sdg_input != "0" else (
             "None" if sdg_input == "0" else predicted_sdg)
 
@@ -136,5 +165,15 @@ async def label_descriptions_from_db(search_text, translate=True, output_file="l
 
 
 if __name__ == "__main__":
+
+    # Get the first argument from the command line corresponding to the search text
+    import argparse
+    parser = argparse.ArgumentParser(description="Label patent descriptions.")
+    parser.add_argument(
+        "search_text", type=str, nargs='+', help="Keyword(s) to search for in patent descriptions. Use quotes for multiple words.")
+    args = parser.parse_args()
+    # Join multiple words into a single string
+    search_text = ' '.join(args.search_text)
+
     # Launch manual labeling with a keyword search
-    asyncio.run(label_descriptions_from_db("peace"))
+    asyncio.run(label_descriptions_from_db(search_text))
