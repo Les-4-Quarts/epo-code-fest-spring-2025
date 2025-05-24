@@ -1,4 +1,5 @@
 from io import BytesIO
+import re
 from fastapi import UploadFile
 from api.repositories import patent_repository, sdg_summary_repository
 from api.models.Patent import Patent, FullPatent, PatentList
@@ -78,7 +79,7 @@ def get_full_patent_by_number(patent_number: str) -> FullPatent:
     return None
 
 
-def get_all_patents(first: int = 1, last: int = 100) -> PatentList:
+def get_all_patents(first: int = 0, last: int = 99) -> PatentList:
     """
     Retrieve all patents from the database.
 
@@ -108,7 +109,7 @@ def get_all_patents(first: int = 1, last: int = 100) -> PatentList:
     return []
 
 
-def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int = 100) -> list[Patent]:
+def get_all_patents_by_applicant(applicant_name: str, first: int = 0, last: int = 99) -> list[Patent]:
     """
     Get all patents by applicant name.
 
@@ -138,6 +139,95 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
 
     logger.warning(f"No patents found for applicant {applicant_name}.")
     return []
+
+
+def search_patents(query: str, first: int = 0, last: int = 99) -> PatentList:
+    """
+    Search for patents based on a query string.
+
+    Args:
+        query (str): The search query string in CQL format.
+        first (int): The index of the first patent to retrieve.
+        last (int): The index of the last patent to retrieve.
+
+    Returns:
+        PatentList: A list of patents matching the search query.
+    """
+    logger.debug(f"Searching patents with query: {query}")
+
+    # Parse the query to ensure it is in the correct format
+    args = parse_cql_to_args(query)
+
+    # Call the repository function to search patents
+    patents_data = patent_repository.search_patents(
+        text=args.get("text"),
+        patent_number=args.get("patent_number"),
+        publication_date=args.get("publication_date"),
+        country=args.get("country"),
+        applicant=args.get("applicant"),
+        sdgs=args.get("sdgs"),
+        first=first,
+        last=last
+    )
+
+    if patents_data:
+        patents = [Patent(**patent) for patent in patents_data["patents"]]
+        return PatentList(
+            total_count=patents_data["total_count"],
+            total_results=patents_data["total_results"],
+            first=patents_data["first"],
+            last=patents_data["last"],
+            patents=patents
+        )
+
+    logger.warning("No patents found for the search query.")
+    return []
+
+
+def parse_cql_to_args(cql_query: str) -> dict:
+    """
+    Parse a CQL query string into Python arguments.
+
+    Args:
+        cql_query (str): The CQL query string.
+
+    Returns:
+        dict: A dictionary of parsed arguments.
+    """
+    logger.debug(f"Parsing CQL query: {cql_query}")
+
+    # Define a regex pattern to extract key-value pairs
+    pattern = r'(\w+)=["\']?([^"\']+)["\']?'
+    matches = re.findall(pattern, cql_query)
+
+    # Map CQL keys to Python argument names
+    cql_to_python_map = {
+        "text": "text",
+        "patent_number": "patent_number",
+        "publication_date": "publication_date",
+        "country": "country",
+        "applicant": "applicant",
+        "sdg": "sdgs"
+    }
+
+    # Initialize the arguments dictionary
+    args = {key: None for key in cql_to_python_map.values()}
+
+    # Populate the arguments dictionary
+    for key, value in matches:
+        if key in cql_to_python_map:
+            python_key = cql_to_python_map[key]
+            if python_key == "sdgs":
+                # Handle multiple SDGs (split by "OR")
+                if args[python_key] is None:
+                    args[python_key] = []
+                args[python_key].extend(value.split(" OR "))
+            else:
+                args[python_key] = value
+
+    # Log the parsed arguments
+    logger.debug(f"Parsed arguments: {args}")
+    return args
 
 
 def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
@@ -329,3 +419,12 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
 
     logger.warning("No analysis results found.")
     return []
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+
+    # Test search_patents function
+    test_query = "text='mobile device with user activated'"
+    result = search_patents(test_query)
+    pprint(result.model_dump())
