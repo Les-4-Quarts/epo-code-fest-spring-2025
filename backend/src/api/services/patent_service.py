@@ -1,8 +1,14 @@
+from io import BytesIO
 from fastapi import UploadFile
 from api.repositories import patent_repository
 from api.models.Patent import Patent, FullPatent, PatentList
 from api.models.SDGSummary import SDGSummary
 from api.config.logging_config import logger
+
+from pdf2image import convert_from_bytes
+from PyPDF2 import PdfReader
+from pytesseract import image_to_string
+import numpy as np
 
 
 def create_patent(patent: Patent):
@@ -142,7 +148,6 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
     logger.debug(f"Analyzing patent PDF file: {pdf_file.filename}")
 
     # Call the repository function to analyze the patent PDF
-    # TODO: Implement the actual analysis logic
     sdg_summary = [
         {
             "patent_number": "EP1234567",
@@ -164,11 +169,120 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
         }
     ]
 
+    if not pdf_file:
+        logger.error("No PDF file provided for analysis.")
+        return []
+
+    # Read the PDF file bytes
+    pdf_bytes = pdf_file.file.read()
+    if not pdf_bytes:
+        logger.error("Failed to read PDF file bytes.")
+        return []
+
+    # Extract text from the PDF
+    text = extract_text_from_pdf(pdf_bytes)
+    if not text:
+        logger.error("Failed to extract text from PDF file.")
+        return []
+
+    # Filter the extracted text
+    filtered_text = filter(text)
+    if not filtered_text:
+        logger.error("Filtered text is empty after processing.")
+        return []
+
+    # Log the first 500 characters for debugging
+    logger.debug(f"Filtered text: {filtered_text[:500]}...")
+
+    # TODO: Implement the actual analysis logic
+
     if sdg_summary:
         return [SDGSummary(**summary) for summary in sdg_summary]
 
     logger.warning("No analysis results found.")
     return []
+
+
+def extract_text_from_pdf(pdf_bytes):
+    """Extracts text from a PDF file and returns it as a string.
+
+    Args:
+        pdf_bytes (str): The path to the PDF file.
+
+    Returns:
+        str: The extracted text from the PDF.
+    """
+
+    logger.debug("Extracting text from PDF file.")
+
+    if not pdf_bytes:
+        logger.error("No PDF bytes provided for text extraction.")
+        return ""
+
+    # Convert bytes to a file-like object
+    pdf_file = BytesIO(pdf_bytes)
+
+    # Read the PDF file
+    reader = PdfReader(pdf_file)
+
+    # Convert PDF to images
+    images = convert_from_bytes(pdf_bytes, first_page=1, last_page=min(
+        len(reader.pages), 5), dpi=200, fmt='png')
+
+    text = ""
+    for i, image in enumerate(images):
+
+        # Convert PIL image to NumPy array
+        image_np = np.array(image)
+        # Perform OCR on the image
+        result = image_to_string(image_np, lang='eng+fra+deu')
+        # Extract text from the result
+        text += result + "\n"
+
+    return text
+
+
+def filter(text):
+    """Filters out numbers from the given text (lines numbers, pages numbers, columns numbers).
+
+    Args:
+        text (str): The input text.
+
+    Returns:
+        str: The text with numbers filtered out.
+    """
+
+    logger.debug("Filtering text to remove numbers and irrelevant lines.")
+
+    # Split the text into lines
+    lines = text.splitlines()
+
+    # Filter out lines that contain only numbers
+    filtered_lines = [line for line in lines if not line.strip().isdigit()]
+
+    # Filter out empty lines
+    filtered_lines = [line for line in filtered_lines if line.strip()]
+
+    # Get the (57) or [57] characters and remove all text before them (corresponding to start of the abstract)
+    abstract_start = None
+    for i, line in enumerate(filtered_lines):
+        if "(57)" in line or "[57]" in line:
+            abstract_start = i
+            break
+    if abstract_start is not None:
+        filtered_lines = filtered_lines[abstract_start:]
+
+    # Remove lines that are too short (less than 3 characters)
+    filtered_lines = [
+        line for line in filtered_lines if len(line.strip()) >= 5]
+
+    # Join the filtered lines back into a single string
+    filtered_lines = "\n".join(filtered_lines)
+
+    # Keep only the first 3000 words
+    words = filtered_lines.split(" ")
+    filtered_lines = " ".join(words[:3000])
+    return filtered_lines
 
 
 def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:

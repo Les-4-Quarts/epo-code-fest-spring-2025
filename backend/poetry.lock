@@ -3395,6 +3395,22 @@ full = ["Pillow", "PyCryptodome"]
 image = ["Pillow"]
 
 [[package]]
+name = "pytesseract"
+version = "0.3.13"
+description = "Python-tesseract is a python wrapper for Google's Tesseract-OCR"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "pytesseract-0.3.13-py3-none-any.whl", hash = "sha256:7a99c6c2ac598360693d83a416e36e0b33a67638bb9d77fdcac094a3589d4b34"},
+    {file = "pytesseract-0.3.13.tar.gz", hash = "sha256:4bf5f880c99406f52a3cfc2633e42d9dc67615e69d8a509d74867d3baddb5db9"},
+]
+
+[package.dependencies]
+packaging = ">=21.3"
+Pillow = ">=8.0.0"
+
+[[package]]
 name = "python-bidi"
 version = "0.6.6"
 description = "Python Bidi layout wrapping the Rust crate unicode-bidi"
@@ -5276,4 +5292,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13, <4.0"
-content-hash = "4e1d23009178246af667cf04b53a6ab31cf1e0038353a1cac5ab77821365286a"
+content-hash = "767e44db385690a967520c1a6f12583e13144239c2c6fed0834357a1c1be813f"
