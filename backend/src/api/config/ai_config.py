@@ -16,13 +16,15 @@ def check_model_exists(model_name: str) -> bool:
         bool: True if the model exists, False otherwise.
     """
     try:
-        result = subprocess.run(["ollama", "list"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["ollama", "list"], capture_output=True, text=True, check=True)
         lines = result.stdout.strip().splitlines()
         exists = any(model_name in line for line in lines if line)
         logger.debug(f"Model '{model_name}' exists: {exists}")
         return exists
     except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to check model existence with 'ollama list': {e}")
+        logger.error(
+            f"Failed to check model existence with 'ollama list': {e}")
         return False
 
 
@@ -37,7 +39,8 @@ def download_model(model_name: str) -> bool:
         bool: True if the download was successful, False otherwise.
     """
     try:
-        logger.debug(f"Starting download of model '{model_name}' using Ollama.")
+        logger.debug(
+            f"Starting download of model '{model_name}' using Ollama.")
         subprocess.run(["ollama", "pull", model_name], check=True)
         logger.info(f"Model '{model_name}' downloaded successfully.")
     except subprocess.CalledProcessError as e:
@@ -58,7 +61,8 @@ def initialize_ollama_model(model_name: str) -> None:
         Exception: If the model download fails.
     """
     if not check_model_exists(model_name):
-        logger.info(f"Model '{model_name}' not found locally. Starting download...")
+        logger.info(
+            f"Model '{model_name}' not found locally. Starting download...")
         if not download_model(model_name):
             logger.error(f"Download failed for model '{model_name}'.")
             raise Exception(f"Failed to download the model '{model_name}'.")
@@ -106,6 +110,7 @@ def get_ai_config():
     ai_host = ai_config.get('host')
     ai_model = ai_config.get('model')
     ai_huggingface_token = ai_config.get('huggingface_token')
+    prompt_name = ai_config.get('prompt_name')
 
     if not ai_host or not ai_model:
         raise ValueError(
@@ -114,9 +119,9 @@ def get_ai_config():
     logger.debug(f"Loaded AI configuration: host={ai_host}, model={ai_model}")
 
     ai_client = get_ai_client(ai_host)
-    return ai_host, ai_model, ai_client, ai_huggingface_token
+    return ai_host, ai_model, ai_client, prompt_name, ai_huggingface_token
 
 
 # On module load: initialize the AI client, ensure the model is available (download if missing)
-ai_host, ai_model, ai_client, ai_huggingface_token = get_ai_config()
+ai_host, ai_model, ai_client, prompt_name, ai_huggingface_token = get_ai_config()
 initialize_ollama_model(ai_model)

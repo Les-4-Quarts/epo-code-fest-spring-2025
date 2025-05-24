@@ -1,9 +1,14 @@
 from io import BytesIO
 from fastapi import UploadFile
-from api.repositories import patent_repository
+from api.repositories import patent_repository, sdg_summary_repository
 from api.models.Patent import Patent, FullPatent, PatentList
 from api.models.SDGSummary import SDGSummary
 from api.config.logging_config import logger
+from ai.models.classify_patent import Classify_patent
+
+
+from api.config.ai_config import ai_client, ai_model, prompt_name
+
 
 from pdf2image import convert_from_bytes
 from PyPDF2 import PdfReader
@@ -147,28 +152,6 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
     """
     logger.debug(f"Analyzing patent PDF file: {pdf_file.filename}")
 
-    # Call the repository function to analyze the patent PDF
-    sdg_summary = [
-        {
-            "patent_number": "EP1234567",
-            "sdg": "SDG3",
-            "sdg_reason": "This patent focuses on innovative healthcare solutions, including advanced medical devices, improved drug delivery systems, and technologies aimed at enhancing global health outcomes.",
-            "sdg_details": "A revolutionary vaccine platform that enables rapid development and distribution of vaccines for emerging infectious diseases, ensuring timely responses to global health crises.\nAn AI-powered wearable device that continuously monitors patient vitals, predicts potential health risks, and provides real-time alerts to healthcare providers.\nA telemedicine platform that leverages high-speed internet and AI diagnostics to provide remote healthcare services to underserved communities."
-        },
-        {
-            "patent_number": "EP2345678",
-            "sdg": "SDG7",
-            "sdg_reason": "This patent addresses the development of sustainable energy technologies, including renewable energy systems, energy storage solutions, and energy-efficient designs for a cleaner future.",
-            "sdg_details": "A next-generation solar panel system that integrates nanotechnology to significantly increase energy conversion efficiency and reduce production costs.\nA modular wind turbine design optimized for urban environments, enabling clean energy generation in densely populated areas.\nA breakthrough in hydrogen fuel cell technology that enhances energy storage capacity and reduces dependency on fossil fuels.\nAn innovative energy management system that uses AI to optimize energy consumption in smart homes and reduce electricity bills.\nA portable solar-powered water desalination unit designed to provide clean drinking water in remote and disaster-stricken areas.\nA high-capacity battery storage system for renewable energy grids, ensuring stable energy supply during peak demand periods.\nA bio-inspired cooling system for solar panels that increases efficiency by maintaining optimal operating temperatures."
-        },
-        {
-            "patent_number": "EP3456789",
-            "sdg": "SDG13",
-            "sdg_reason": "This patent focuses on combating climate change through innovative environmental technologies, such as carbon capture, sustainable materials, and solutions for reducing greenhouse gas emissions.",
-            "sdg_details": "A carbon capture and storage technology that efficiently removes CO2 from industrial emissions and stores it safely underground.\nA biodegradable alternative to traditional plastics, reducing environmental pollution and promoting sustainable packaging solutions.\nA drone-based system for monitoring deforestation and providing actionable insights to promote reforestation efforts.\nA smart irrigation system powered by renewable energy that optimizes water usage in agriculture, reducing waste and improving crop yields.\nA thermal insulation material made from recycled waste, designed to improve energy efficiency in buildings and reduce carbon footprints.\nA marine ecosystem restoration technology that uses artificial reefs to combat ocean acidification and promote biodiversity.\nA predictive analytics tool for assessing the impact of climate change on urban infrastructure and guiding sustainable development.\nA renewable energy-powered air purification system that reduces urban air pollution and improves public health.\nA blockchain-based platform for tracking carbon credits and incentivizing businesses to adopt sustainable practices.\nA water purification system that uses solar energy to provide clean drinking water in regions affected by climate change-induced droughts."
-        }
-    ]
-
     if not pdf_file:
         logger.error("No PDF file provided for analysis.")
         return []
@@ -194,7 +177,20 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
     # Log the first 500 characters for debugging
     logger.debug(f"Filtered text: {filtered_text[:500]}...")
 
-    # TODO: Implement the actual analysis logic
+    # Call the repository function to analyze the patent PDF
+    model = Classify_patent(ai_client, ai_model, prompt_name)
+
+    sdgs, reason = model.analyze_patent(filtered_text)
+
+    sdg_summary = []
+    for sdg in sdgs:
+        sdg_summary.append(
+            {
+                "sdg": sdg,
+                "sdg_reason": reason,
+                "sdg_details": "tqt ca arrive fort"  # TODO
+            }
+        )
 
     if sdg_summary:
         return [SDGSummary(**summary) for summary in sdg_summary]
@@ -296,31 +292,39 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
         list[SDGSummary]: A list of SDG summaries extracted from the patent.
     """
     logger.debug(f"Analyzing patent by number: {patent_number}")
+    patent_text = ""
+    patent = get_full_patent_by_number(patent_number)
+
+    if patent.fr_abstract:
+        patent_text += f"{patent.fr_abstract}\n"
+    if patent.en_abstract:
+        patent_text += f"{patent.en_abstract}\n"
+    if patent.de_abstract:
+        patent_text += f"{patent.de_abstract}\n"
+
+    for desc in patent.description:
+        patent_text += f"{desc["description_number"]}: {desc["description_text"]}\n"
+
+    patent_text = " ".join(patent_text.split()[:3000])
 
     # Call the repository function to analyze the patent PDF
-    # TODO: Implement the actual analysis logic
-    sdg_summary = [
-        {
-            "patent_number": "EP1234567",
-            "sdg": "SDG3",
-            "sdg_reason": "This patent focuses on innovative healthcare solutions, including advanced medical devices, improved drug delivery systems, and technologies aimed at enhancing global health outcomes.",
-            "sdg_details": "A revolutionary vaccine platform that enables rapid development and distribution of vaccines for emerging infectious diseases, ensuring timely responses to global health crises.\nAn AI-powered wearable device that continuously monitors patient vitals, predicts potential health risks, and provides real-time alerts to healthcare providers.\nA telemedicine platform that leverages high-speed internet and AI diagnostics to provide remote healthcare services to underserved communities."
-        },
-        {
-            "patent_number": "EP2345678",
-            "sdg": "SDG7",
-            "sdg_reason": "This patent addresses the development of sustainable energy technologies, including renewable energy systems, energy storage solutions, and energy-efficient designs for a cleaner future.",
-            "sdg_details": "A next-generation solar panel system that integrates nanotechnology to significantly increase energy conversion efficiency and reduce production costs.\nA modular wind turbine design optimized for urban environments, enabling clean energy generation in densely populated areas.\nA breakthrough in hydrogen fuel cell technology that enhances energy storage capacity and reduces dependency on fossil fuels.\nAn innovative energy management system that uses AI to optimize energy consumption in smart homes and reduce electricity bills.\nA portable solar-powered water desalination unit designed to provide clean drinking water in remote and disaster-stricken areas.\nA high-capacity battery storage system for renewable energy grids, ensuring stable energy supply during peak demand periods.\nA bio-inspired cooling system for solar panels that increases efficiency by maintaining optimal operating temperatures."
-        },
-        {
-            "patent_number": "EP3456789",
-            "sdg": "SDG13",
-            "sdg_reason": "This patent focuses on combating climate change through innovative environmental technologies, such as carbon capture, sustainable materials, and solutions for reducing greenhouse gas emissions.",
-            "sdg_details": "A carbon capture and storage technology that efficiently removes CO2 from industrial emissions and stores it safely underground.\nA biodegradable alternative to traditional plastics, reducing environmental pollution and promoting sustainable packaging solutions.\nA drone-based system for monitoring deforestation and providing actionable insights to promote reforestation efforts.\nA smart irrigation system powered by renewable energy that optimizes water usage in agriculture, reducing waste and improving crop yields.\nA thermal insulation material made from recycled waste, designed to improve energy efficiency in buildings and reduce carbon footprints.\nA marine ecosystem restoration technology that uses artificial reefs to combat ocean acidification and promote biodiversity.\nA predictive analytics tool for assessing the impact of climate change on urban infrastructure and guiding sustainable development.\nA renewable energy-powered air purification system that reduces urban air pollution and improves public health.\nA blockchain-based platform for tracking carbon credits and incentivizing businesses to adopt sustainable practices.\nA water purification system that uses solar energy to provide clean drinking water in regions affected by climate change-induced droughts."
-        }
-    ]
+    model = Classify_patent(ai_client, ai_model, prompt_name)
+
+    sdgs, reason = model.analyze_patent(patent_text)
+
+    sdg_summary = []
+    for sdg in sdgs:
+        sdg_summary.append(
+            {
+                "patent_number": patent_number,
+                "sdg": sdg,
+                "sdg_reason": reason,
+                "sdg_details": "tqt ca arrive fort"  # TODO
+            }
+        )
 
     if sdg_summary:
+        sdg_summary_repository.create_sdg_summary(sdg_summary)
         return [SDGSummary(**summary) for summary in sdg_summary]
 
     logger.warning("No analysis results found.")
