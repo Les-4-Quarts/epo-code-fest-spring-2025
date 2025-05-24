@@ -91,7 +91,6 @@ def create_description_table():
     - `description_number`: the id of the description (PK)
     - `patent_number`: the patent number (PK, FK)
     - `description_text`: the text of the description
-    - `sdg`: the SDG of the description
 
     Returns:
         None
@@ -107,7 +106,6 @@ def create_description_table():
         description_number INT,
         patent_number VARCHAR(255) REFERENCES patent(number),
         description_text TEXT,
-        sdg VARCHAR(255),
         PRIMARY KEY (description_number, patent_number)
     );
     """
@@ -127,7 +125,6 @@ def create_claim_table():
     - `claim_number`: the id of the claim (PK)
     - `patent_number`: the patent number (PK, FK)
     - `claim_text`: the text of the claim
-    - `sdg`: the SDG of the claim
 
     Returns:
         None
@@ -143,7 +140,6 @@ def create_claim_table():
         claim_number INT,
         patent_number VARCHAR(255) REFERENCES patent(number),
         claim_text TEXT,
-        sdg VARCHAR(255),
         PRIMARY KEY (claim_number, patent_number)
     );
     """
@@ -194,7 +190,8 @@ def create_sdg_summary_table():
     Description:
     - `patent_number`: the patent number (PK, FK)
     - `sdg`: the SDG of the patent (PK)
-    - `sdg_description`: the description why the patent is related to the SDG
+    - `sdg_reason`: the reason why the patent is related to the SDG
+    - `sdg_details`: the text related to the SDG in the patent
     Returns:
         None
     """
@@ -208,7 +205,8 @@ def create_sdg_summary_table():
     CREATE TABLE IF NOT EXISTS patent_sdg_summary (
         patent_number VARCHAR(255) REFERENCES patent(number),
         sdg VARCHAR(255),
-        sdg_description TEXT,
+        sdg_reason TEXT,
+        sdg_details TEXT,
         PRIMARY KEY (patent_number, sdg)
     );
     """

@@ -7,7 +7,11 @@ def create_sdg_summary(sdg_summary: dict):
     Insert SDG summary data into the PostgreSQL database.
 
     Args:
-        sdg_summary (dict): A dictionary containing SDG summary data.
+        sdg_summary (dict): A dictionary containing SDG summary data. Keys should include:
+            - patent_number (str): The patent number.
+            - sdg (str): The SDG related to the patent.
+            - sdg_reason (str): The reason why the patent is related to the SDG.
+            - sdg_details (str): The text related to the SDG in the patent.
 
     Returns:
         None
@@ -20,15 +24,16 @@ def create_sdg_summary(sdg_summary: dict):
 
     # Insert SDG summary data into the sdg_summary table
     insert_sdg_summary_query = """
-    INSERT INTO patent_sdg_summary (patent_number, sdg, sdg_description)
-    VALUES (%s, %s, %s)
+    INSERT INTO patent_sdg_summary (patent_number, sdg, sdg_reason, sdg_details)
+    VALUES (%s, %s, %s, %s)
     ON CONFLICT (patent_number, sdg) DO NOTHING;
     """
 
     cursor.execute(insert_sdg_summary_query, (
         sdg_summary["patent_number"],
         sdg_summary["sdg"],
-        sdg_summary["sdg_description"]
+        sdg_summary["sdg_reason"],
+        sdg_summary["sdg_details"]
     ))
 
     conn.commit()
@@ -59,7 +64,7 @@ def get_sdg_summary_by_patent_number(patent_number: str) -> list:
 
     # Retrieve SDG summary data for the specified patent number
     select_sdg_summary_query = """
-    SELECT patent_number, sdg, sdg_description
+    SELECT patent_number, sdg, sdg_reason, sdg_details
     FROM patent_sdg_summary
     WHERE patent_number = %s;
     """
@@ -69,7 +74,7 @@ def get_sdg_summary_by_patent_number(patent_number: str) -> list:
 
     # Convert the result to a list of dictionaries
     sdg_summary_list = [
-        {"patent_number": row[0], "sdg": row[1], "sdg_description": row[2]} for row in rows]
+        {"patent_number": row[0], "sdg": row[1], "sdg_reason": row[2], "sdg_details": row[3]} for row in rows]
 
     cursor.close()
     conn.close()
@@ -84,12 +89,12 @@ if __name__ == "__main__":
     from pprint import pprint
     # Example usage
     sdg_summary_data = [{
-        "patent_number": "EP4516865A2",
+        "patent_number": "EP0000000A1",
         "sdg": "SDG 1: No Poverty",
         "sdg_description": "This patent relates to a method for providing financial assistance to low-income individuals."
     },
         {
-        "patent_number": "EP4516865A2",
+        "patent_number": "EP0000000A1",
         "sdg": "SDG 2: Zero Hunger",
         "sdg_description": "This patent relates to a method for improving agricultural productivity."
     }]

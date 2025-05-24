@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Header, UploadFile
 
-from api.models.Analysis import Analysis
+from api.models.SDGSummary import SDGSummary
 from api.models.Patent import Patent, FullPatent, PatentList
 from api.services import patent_service
 from api.config.logging_config import logger
@@ -140,8 +140,8 @@ async def get_all_patents_by_applicant(
     return patents
 
 
-@router.post("/analyze", response_model=Analysis)
-async def analyze_patent_pdf(pdf_file: UploadFile) -> Analysis:
+@router.post("/analyze", response_model=list[SDGSummary])
+async def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
     """
     Analyze a patent PDF and extract relevant information.
 
@@ -164,8 +164,8 @@ async def analyze_patent_pdf(pdf_file: UploadFile) -> Analysis:
     return analysis_result
 
 
-@router.get("/analyze/{patent_number}", response_model=Analysis)
-async def analyze_patent_by_number(patent_number: str) -> Analysis:
+@router.get("/analyze/{patent_number}", response_model=list[SDGSummary])
+async def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
     """
     Analyze a patent by patent number and extract relevant information.
 

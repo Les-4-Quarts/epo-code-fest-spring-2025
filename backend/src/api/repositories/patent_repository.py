@@ -151,7 +151,8 @@ def get_patent_by_number(number: str) -> dict:
         "country": result[7],
         "publication_date": result[8],
         "is_analyzed": result[9],
-        "applicants": []
+        "applicants": [],
+        "sdgs": [],
     }
 
     cursor.close()
@@ -170,6 +171,21 @@ def get_patent_by_number(number: str) -> dict:
             "name": applicant[0],
             "patent_number": applicant[1]
         })
+    cursor.close()
+
+    # Fetch the SDGs for each patent
+    fetch_sdgs_query = """
+    SELECT DISTINCT sdg
+    FROM patent_sdg_summary
+    WHERE patent_number = %s;
+    """
+    cursor = conn.cursor()
+    cursor.execute(fetch_sdgs_query, (result[0],))
+    sdgs = cursor.fetchall()
+
+    for sdg in sdgs:
+        if (sdg[0] != 'None'):
+            patent["sdgs"].append(sdg[0])
     cursor.close()
 
     # Close the database connection
@@ -220,6 +236,7 @@ def get_full_patent_by_number(number: str) -> dict:
         "publication_date": result[8],
         "is_analyzed": result[9],
         "applicants": [],
+        "sdgs": [],
         "description": [],
         "claims": [],
         "sdg_summary": []
@@ -229,7 +246,7 @@ def get_full_patent_by_number(number: str) -> dict:
 
     # Fetch the claims from the database
     fetch_claims_query = """
-    SELECT claim_number, claim_text, patent_number, sdg
+    SELECT claim_number, claim_text, patent_number
     FROM patent_claim
     WHERE patent_number = %s;
     """
@@ -240,14 +257,13 @@ def get_full_patent_by_number(number: str) -> dict:
         patent["claims"].append({
             "claim_number": claim[0],
             "claim_text": claim[1],
-            "patent_number": claim[2],
-            "sdg": claim[3]
+            "patent_number": claim[2]
         })
     cursor.close()
 
     # Fetch the description from the database
     fetch_description_query = """
-    SELECT description_number, description_text, patent_number, sdg
+    SELECT description_number, description_text, patent_number
     FROM patent_description
     WHERE patent_number = %s;
     """
@@ -258,8 +274,7 @@ def get_full_patent_by_number(number: str) -> dict:
         patent["description"].append({
             "description_number": description[0],
             "description_text": description[1],
-            "patent_number": description[2],
-            "sdg": description[3]
+            "patent_number": description[2]
         })
     cursor.close()
 
@@ -279,9 +294,24 @@ def get_full_patent_by_number(number: str) -> dict:
         })
     cursor.close()
 
+    # Fetch the SDGs for each patent
+    fetch_sdgs_query = """
+    SELECT DISTINCT sdg
+    FROM patent_sdg_summary
+    WHERE patent_number = %s;
+    """
+    cursor = conn.cursor()
+    cursor.execute(fetch_sdgs_query, (result[0],))
+    sdgs = cursor.fetchall()
+
+    for sdg in sdgs:
+        if (sdg[0] != 'None'):
+            patent["sdgs"].append(sdg[0])
+    cursor.close()
+
     # Fetch the SDG summary from the database
     select_sdg_summary_query = """
-    SELECT patent_number, sdg, sdg_description
+    SELECT patent_number, sdg, sdg_reason, sdg_details
     FROM patent_sdg_summary
     WHERE patent_number = %s;
     """
@@ -292,7 +322,8 @@ def get_full_patent_by_number(number: str) -> dict:
         patent["sdg_summary"].append({
             "patent_number": sdg_summary[0],
             "sdg": sdg_summary[1],
-            "sdg_description": sdg_summary[2]
+            "sdg_reason": sdg_summary[2],
+            "sdg_details": sdg_summary[3]
         })
     cursor.close()
 
@@ -333,6 +364,7 @@ def get_all_patents(first: int = 0, last: int = 100) -> dict:
                     "applicants": [
                         {"name": "Applicant Name", "patent_number": "US1234567"}
                     ]
+                    "sdgs": ["SDG 1", "SDG 2"]
                 }
             ],
             "total_count": 1000,
@@ -408,7 +440,7 @@ def get_all_patents(first: int = 0, last: int = 100) -> dict:
         # Fetch the SDGs for each patent
         fetch_sdgs_query = """
         SELECT DISTINCT sdg
-        FROM patent_description
+        FROM patent_sdg_summary
         WHERE patent_number = %s;
         """
         cursor = conn.cursor()
@@ -416,7 +448,6 @@ def get_all_patents(first: int = 0, last: int = 100) -> dict:
         sdgs = cursor.fetchall()
 
         for sdg in sdgs:
-            # print(sdg[0])
             if (sdg[0] != 'None'):
                 patents[-1]["sdgs"].append(sdg[0])
         cursor.close()
@@ -464,6 +495,7 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
                     "applicants": [
                         {"name": "Applicant Name", "patent_number": "US1234567"}
                     ]
+                    "sdgs": ["SDG 1", "SDG 2"]
                 }
             ],
             "total_count": 1000,
@@ -510,6 +542,7 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
             "publication_date": result[8],
             "is_analyzed": result[9],
             "applicants": [],
+            "sdgs": [],
         })
 
         # Fetch the applicants for each patent
@@ -526,6 +559,20 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
                 "name": applicant[0],
                 "patent_number": applicant[1]
             })
+        cursor.close()
+
+        # Fetch the SDGs for each patent
+        fetch_sdgs_query = """
+        SELECT DISTINCT sdg
+        FROM patent_sdg_summary
+        WHERE patent_number = %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(fetch_sdgs_query, (result[0],))
+        sdgs = cursor.fetchall()
+        for sdg in sdgs:
+            if (sdg[0] != 'None'):
+                patents[-1]["sdgs"].append(sdg[0])
         cursor.close()
 
     # Close the database connection
@@ -587,13 +634,12 @@ def update_full_patent(patent: dict) -> None:
     for claim in patent["claims"]:
         update_claim_query = """
         UPDATE patent_claim
-        SET claim_text = %s, sdg = %s
+        SET claim_text = %s
         WHERE claim_number = %s AND patent_number = %s;
         """
 
         cursor.execute(update_claim_query, (
             claim["claim_text"],
-            claim["sdg"],
             int(claim["claim_number"]),
             number
         ))
@@ -604,13 +650,12 @@ def update_full_patent(patent: dict) -> None:
     for description in patent["description"]:
         update_description_query = """
         UPDATE patent_description
-        SET description_text = %s, sdg = %s
+        SET description_text = %s
         WHERE description_number = %s AND patent_number = %s;
         """
 
         cursor.execute(update_description_query, (
             description["description_text"],
-            description["sdg"],
             int(description["description_number"]),
             number
         ))
