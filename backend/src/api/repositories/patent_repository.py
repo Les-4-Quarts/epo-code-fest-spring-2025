@@ -45,7 +45,7 @@ def create_patent(patent: dict):
         insert_claim_query = """
         INSERT INTO patent_claim (claim_number, patent_number, claim_text)
         VALUES (%s, %s, %s)
-        ON CONFLICT (claim_number) DO NOTHING;
+        ON CONFLICT (claim_number, patent_number) DO NOTHING;
         """
 
         # Claim example: "1. A method for processing..."
@@ -66,7 +66,7 @@ def create_patent(patent: dict):
         insert_description_query = """
         INSERT INTO patent_description (description_number, patent_number, description_text)
         VALUES (%s, %s, %s)
-        ON CONFLICT (description_number) DO NOTHING;
+        ON CONFLICT (description_number, patent_number) DO NOTHING;
         """
 
         # Description example: "TECHNICAL FIELD",
@@ -88,14 +88,13 @@ def create_patent(patent: dict):
         ))
 
     conn.commit()
-    cursor.close()
 
     # Insert applicants into the patent_applicant table
     for applicant in patent["applicants"]:
         insert_applicant_query = """
         INSERT INTO patent_applicant (applicant_name, patent_number)
         VALUES (%s, %s)
-        ON CONFLICT (applicant_name) DO NOTHING;
+        ON CONFLICT (applicant_name, patent_number) DO NOTHING;
         """
 
         cursor.execute(insert_applicant_query, (
@@ -335,7 +334,7 @@ def get_full_patent_by_number(number: str) -> dict:
     return patent
 
 
-def get_all_patents(first: int = 0, last: int = 100) -> dict:
+def get_all_patents(first: int = 0, last: int = 99) -> dict:
     """
     Get all patents from the PostgreSQL database order by publication date.
 
@@ -466,7 +465,7 @@ def get_all_patents(first: int = 0, last: int = 100) -> dict:
     }
 
 
-def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int = 100) -> dict:
+def get_all_patents_by_applicant(applicant_name: str, first: int = 0, last: int = 99) -> dict:
     """
     Get all patents by applicant name from the PostgreSQL database order by publication date.
 
@@ -590,6 +589,145 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 1, last: int 
     }
 
 
+def search_patents(text: str = None, patent_number: str = None, publication_date: str = None, country: str = None, applicant: str = None, sdgs: list[str] = None, first: int = 0, last: int = 99) -> dict:
+    """Search patents in the PostgreSQL database based on various criteria.
+
+    Args:
+        text (str, optional): Description text to search in titles, abstracts, descriptions and claims. Defaults to None.
+        patent_number (str, optional): Patent number to search for. Defaults to None.
+        publication_date (str, optional): Publication date to search for in the format 'YYYYMMDD'. Defaults to None.
+        country (str, optional): Country code to search for. Defaults to None.
+        sdgs (list[str], optional): List of SDGs to search for. Defaults to None.
+        first (int, optional): Starting index for pagination. Defaults to 0.
+        last (int, optional): Ending index for pagination. Defaults to 100.
+
+    Returns:
+        dict: A dictionary containing search results with pagination.
+    """
+    logger.debug("Searching patents with criteria: "
+                 f"text={text}, patent_number={patent_number}, publication_date={publication_date}, country={country}, applicant={applicant}, sdgs={sdgs}")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Build the base query
+    base_query = """
+    SELECT patent.number, patent.en_title, patent.fr_title, patent.de_title, patent.en_abstract, patent.fr_abstract, patent.de_abstract, patent.country, patent.publication_date, patent.is_analyzed
+    FROM patent
+    """
+
+    # Initialize conditions and parameters
+    conditions = []
+    params = []
+
+    if text:
+        conditions.append(
+            "(LOWER(patent.en_title) LIKE LOWER(%s) OR LOWER(patent.fr_title) LIKE LOWER(%s) OR LOWER(patent.de_title) LIKE LOWER(%s) OR LOWER(patent.en_abstract) LIKE LOWER(%s) OR LOWER(patent.fr_abstract) LIKE LOWER(%s) OR LOWER(patent.de_abstract) LIKE LOWER(%s))")
+        text_param = f"%{text}%"
+        params.extend([text_param] * 6)
+
+    if patent_number:
+        conditions.append("patent.number LIKE %s")
+        params.append(f"%{patent_number}%")
+
+    if publication_date:
+        conditions.append("patent.publication_date LIKE %s")
+        params.append(f"%{publication_date}%")
+
+    if country:
+        conditions.append("patent.country = %s")
+        params.append(country)
+
+    if applicant:
+        conditions.append(
+            "EXISTS (SELECT 1 FROM patent_applicant WHERE patent_applicant.patent_number = patent.number AND LOWER(patent_applicant.applicant_name) LIKE LOWER(%s))")
+        params.append(f"%{applicant}%")
+
+    if sdgs:
+        conditions.append(
+            "EXISTS (SELECT 1 FROM patent_sdg_summary WHERE patent_sdg_summary.patent_number = patent.number AND sdg IN %s)")
+        params.append(tuple(sdgs))
+
+    # Combine conditions into the query
+    if conditions:
+        base_query += " WHERE " + " AND ".join(conditions)
+
+    # Add ordering and pagination
+    base_query += " ORDER BY patent.publication_date DESC, patent.number ASC LIMIT %s OFFSET %s;"
+    params.extend([last - first, first])
+
+    # Execute the query
+    cursor.execute(base_query, params)
+    results = cursor.fetchall()
+    cursor.close()
+    if not results:
+        logger.debug("No patents found matching the search criteria.")
+        print(applicant is None)
+        return {
+            "patents": [],
+            "total_count": 0,
+            "first": first,
+            "last": last,
+            "total_results": 0
+        }
+    patents = []
+    for result in results:
+        patents.append({
+            "number": result[0],
+            "en_title": result[1],
+            "fr_title": result[2],
+            "de_title": result[3],
+            "en_abstract": result[4],
+            "fr_abstract": result[5],
+            "de_abstract": result[6],
+            "country": result[7],
+            "publication_date": result[8],
+            "is_analyzed": result[9],
+            "applicants": [],
+            "sdgs": [],
+        })
+
+        # Fetch the applicants for each patent
+        fetch_applicants_query = """
+        SELECT applicant_name, patent_number
+        FROM patent_applicant
+        WHERE patent_number = %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(fetch_applicants_query, (result[0],))
+        applicants = cursor.fetchall()
+        for applicant in applicants:
+            patents[-1]["applicants"].append({
+                "name": applicant[0],
+                "patent_number": applicant[1]
+            })
+        cursor.close()
+
+        # Fetch the SDGs for each patent
+        fetch_sdgs_query = """
+        SELECT DISTINCT sdg
+        FROM patent_sdg_summary
+        WHERE patent_number = %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(fetch_sdgs_query, (result[0],))
+        sdgs = cursor.fetchall()
+        for sdg in sdgs:
+            if (sdg[0] != 'None'):
+                patents[-1]["sdgs"].append(sdg[0])
+        cursor.close()
+    # Close the database connection
+    conn.close()
+    logger.debug("Patent search completed successfully")
+    return {
+        "patents": patents,
+        "total_count": len(patents),
+        "first": first,
+        "last": min(last, len(patents)),
+        "total_results": len(patents)
+    }
+
+
 def update_full_patent(patent: dict) -> None:
     """
     Update patent data in the PostgreSQL database.
@@ -671,6 +809,41 @@ def update_full_patent(patent: dict) -> None:
 if __name__ == "__main__":
     from pprint import pprint
 
-    # Test update_full_patent
-    patent_data = get_full_patent_by_number("EP4516865A2")
-    update_full_patent(patent_data)
+    # Example usage of the repository functions
+    patent_example = {
+        "number": "EP000000A1",
+        "title": {
+            "en": "Example Patent Title",
+            "fr": "Titre de brevet exemple",
+            "de": "Beispieltitel des Patents"
+        },
+        "abstract": {
+            "en": "This is an example patent abstract in English.",
+            "fr": "Ceci est un exemple de résumé de brevet en français.",
+            "de": "Dies ist eine Beispielpatentszusammenfassung auf Deutsch."
+        },
+        "country": "EP",
+        "publicationDate": "20230101",
+        "claims": [
+            "1. A method for processing data.",
+            "2. A system for managing resources."
+        ],
+        "description": [
+            "[0001] The disclosure relates to the field of data processing.",
+            "[0002] This method provides an efficient way to handle large datasets."
+        ],
+        "applicants": [
+            {"name": "John Doe"},
+            {"name": "Jane Smith"}
+        ]
+    }
+    # create_patent(patent_example)
+    # fetched_patent = get_patent_by_number("EP000000A1")
+    # pprint(fetched_patent)
+
+    # Test search functionality
+    search_results = search_patents(
+        text="mobile device with user activated")
+
+    for patent in search_results["patents"]:
+        pprint(patent)
