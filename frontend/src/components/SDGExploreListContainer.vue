@@ -30,7 +30,7 @@ const isLoading = ref(false)
 
 const patentsCache = ref<Record<number, Patent[]>>({}) // Dictionnaire pour stocker les pages préchargées
 const page = ref(1)
-const pageSize = ref(4)
+const pageSize = ref(3)
 const totalPages = ref(0)
 
 const isPreloading = ref(false) // Global lock to prevent multiple preloads
@@ -252,7 +252,7 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
   flex-direction: column;
   align-items: center;
   padding-top: 20px;
-  height: calc(82vh - (142px * 2) + 50px);
+  height: calc(82vh - (142px * 2) + 30px);
   width: 75%;
   overflow-y: scroll;
 
