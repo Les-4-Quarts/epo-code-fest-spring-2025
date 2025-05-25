@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { marked } from 'marked'
+
 //Locales
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
@@ -16,7 +18,7 @@ import BasicChip from '@/components/Chips/BasicChip.vue'
 import { Doughnut } from 'vue-chartjs'
 import type { Analysis } from '@/types/Analysis'
 const selectedFile = ref<File | null>(null)
-const analysisResult = ref<Analysis | null>(null)
+const analysisResult = ref<Analysis[] | null>(null)
 const isLoading = ref(false)
 const sdgSelected = ref('')
 
@@ -24,9 +26,7 @@ const filteredResults = computed(() => {
   if (!analysisResult.value) {
     return null
   }
-  return analysisResult.value.classified_description.filter(
-    (result) => result.sdg === sdgSelected.value,
-  )
+  return analysisResult.value.filter((result) => result.sdg === sdgSelected.value)
 })
 
 const doughnutData = computed(() => {
@@ -35,7 +35,7 @@ const doughnutData = computed(() => {
   }
 
   // Retrive all labels from the analysis result. Keep only unique labels
-  const labels = analysisResult.value.classified_description
+  const labels = analysisResult.value
     .map((result) => result.sdg)
     .filter((value, index, self) => self.indexOf(value) === index)
 
@@ -44,13 +44,12 @@ const doughnutData = computed(() => {
     if (!analysisResult.value) {
       return 0
     }
-    return analysisResult.value.classified_description.filter((result) => result.sdg === label)
-      .length
+    return analysisResult.value.filter((result) => result.sdg === label).length
   })
 
   // Generate a color for each label
   const backgroundColor = labels.map((label) => {
-    const color = cssvar(`--${label.split(':')[0].trim().toLowerCase().replace(' ', '-')}`)
+    const color = cssvar(`--${label.slice(0, 3).toLowerCase()}-${label.slice(3)}`)
     return color
   })
 
@@ -66,6 +65,11 @@ const doughnutData = computed(() => {
 })
 
 // Methods
+const renderMarkdown = (markdown: string | undefined) => {
+  if (!markdown) return ''
+  return marked(markdown, { breaks: true })
+}
+
 function openFileDialog() {
   const fileInput = document.getElementById('file-input') as HTMLInputElement
   if (fileInput) {
@@ -163,7 +167,7 @@ function cssvar(name: string) {
         <div class="results">
           <div class="results-text">
             <div
-              v-for="(result, index) in analysisResult?.sdg_summary"
+              v-for="(result, index) in analysisResult"
               :key="index"
               @click="sdgSelected = result.sdg"
               class="result"
@@ -172,11 +176,9 @@ function cssvar(name: string) {
                 class="chip"
                 :title="result.sdg"
                 color="white"
-                :bgColor="`var(--${result.sdg.split(':')[0].trim().toLowerCase().replace(' ', '-')})`"
+                :bgColor="`var(--${result.sdg.slice(0, 3).toLowerCase()}-${result.sdg.slice(3)})`"
               />
-              <p>
-                {{ result.sdg_description }}
-              </p>
+              <div v-html="renderMarkdown(result.sdg_reason)"></div>
             </div>
           </div>
           <div class="camembert">
@@ -208,12 +210,12 @@ function cssvar(name: string) {
                 class="chip"
                 :title="sdgSelected"
                 color="white"
-                :bgColor="`var(--${sdgSelected.split(':')[0].trim().toLowerCase().replace(' ', '-')})`"
+                :bgColor="`var(--${sdgSelected.slice(0, 3).toLowerCase()}-${sdgSelected.slice(3)})`"
               />
             </div>
             <div v-for="(result, index) in filteredResults" :key="index">
               <p>
-                {{ result.text }}
+                {{ result.sdg_details }}
               </p>
             </div>
           </div>
@@ -234,7 +236,10 @@ function cssvar(name: string) {
   .analyze-card {
     width: 412px;
     height: 504px;
-    transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    transition:
+      transform 0.3s ease-in-out,
+      background-color 0.3s ease-in-out,
+      color 0.3s ease-in-out;
 
     .content {
       width: 100%;

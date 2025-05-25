@@ -5,35 +5,38 @@ from api.config.logging_config import logger
 from api.config.config import load_config
 
 
-def check_model_exists(model_name: str) -> bool:
+def check_model_exists(model_name: str, client: Client) -> bool:
     """
     Check if the specified model is listed by 'ollama list'.
 
     Args:
         model_name (str): The name of the model to check.
+        client (ollama.Client): The Ollama client to use for the operation.
 
     Returns:
         bool: True if the model exists, False otherwise.
     """
+    logger.debug(f"Checking if model '{model_name}' exists on server...")
+
     try:
-        result = subprocess.run(
-            ["ollama", "list"], capture_output=True, text=True, check=True)
-        lines = result.stdout.strip().splitlines()
-        exists = any(model_name in line for line in lines if line)
-        logger.debug(f"Model '{model_name}' exists: {exists}")
+        models = client.list()
+        logger.debug(f"Available models: {models['models']}")
+        exists = any(model.model == model_name for model in models["models"])
+        logger.debug(f"Model '{model_name}' exists on server: {exists}")
         return exists
-    except subprocess.CalledProcessError as e:
-        logger.error(
-            f"Failed to check model existence with 'ollama list': {e}")
+
+    except Exception as e:
+        logger.error(f"Failed to check model existence from server: {e}")
         return False
 
 
-def download_model(model_name: str) -> bool:
+def download_model(model_name: str, client: Client) -> bool:
     """
     Download the specified model using Ollama.
 
     Args:
         model_name (str): The name of the model to download.
+        client (ollama.Client): The Ollama client to use for the operation.
 
     Returns:
         bool: True if the download was successful, False otherwise.
@@ -41,29 +44,31 @@ def download_model(model_name: str) -> bool:
     try:
         logger.debug(
             f"Starting download of model '{model_name}' using Ollama.")
-        subprocess.run(["ollama", "pull", model_name], check=True)
+
+        client.pull(model_name)
         logger.info(f"Model '{model_name}' downloaded successfully.")
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         logger.error(f"Failed to download model '{model_name}': {e}")
         return False
     return True
 
 
-def initialize_ollama_model(model_name: str) -> None:
+def initialize_ollama_model(model_name: str, client: Client) -> None:
     """
     Ensure the specified Ollama model is available locally.
     If not, download it.
 
     Args:
         model_name (str): The name of the model to initialize.
+        client (ollama.Client): The Ollama client to use for the operation.
 
     Raises:
         Exception: If the model download fails.
     """
-    if not check_model_exists(model_name):
+    if not check_model_exists(model_name, client):
         logger.info(
             f"Model '{model_name}' not found locally. Starting download...")
-        if not download_model(model_name):
+        if not download_model(model_name, client):
             logger.error(f"Download failed for model '{model_name}'.")
             raise Exception(f"Failed to download the model '{model_name}'.")
         else:
@@ -124,4 +129,4 @@ def get_ai_config():
 
 # On module load: initialize the AI client, ensure the model is available (download if missing)
 ai_host, ai_model, ai_client, prompt_name, ai_huggingface_token = get_ai_config()
-initialize_ollama_model(ai_model)
+initialize_ollama_model(ai_model, ai_client)

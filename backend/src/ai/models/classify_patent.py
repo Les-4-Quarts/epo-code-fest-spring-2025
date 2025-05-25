@@ -1,5 +1,6 @@
 import re
 from typing import Tuple, List
+from api.config.logging_config import logger
 
 
 class Classify_patent():
@@ -22,14 +23,14 @@ class Classify_patent():
                 This template should contain a placeholder "{description}"
                 which will be replaced by the patent text.
         """
-        with open(f"prompt/{prompt_name}", "r") as f:
+        with open(f"src/ai/models/prompt/{prompt_name}", "r") as f:
             self.prompt_template = f.read()
         self.model_name = model_name
         self.client = client
         self.temperature = temperature
         self.max_tokens = max_tokens
 
-    def _get_sdg_reason(text: str) -> Tuple[str, str]:
+    def _get_sdg_reason(self, text: str) -> Tuple[str, str]:
         """Extracts SDG (Sustainable Development Goal) and reason from a text.
 
         The input text is expected to contain <sdg> and <reason> XML-like tags
@@ -168,6 +169,7 @@ class Classify_patent():
                 - A string containing the reason for the classification.
         """
         sdg_tag_content, reason = self.generate_response(patent_text)
+        logger.debug(f"SDG Tag Content: {sdg_tag_content}")
         list_sdg = self._extract_sdgs(sdg_tag_content)
 
         return list_sdg, reason

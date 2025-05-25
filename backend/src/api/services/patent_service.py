@@ -276,6 +276,7 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
     for sdg in sdgs:
         sdg_summary.append(
             {
+                "patent_number": None,
                 "sdg": sdg,
                 "sdg_reason": reason,
                 "sdg_details": "tqt ca arrive fort"  # TODO
