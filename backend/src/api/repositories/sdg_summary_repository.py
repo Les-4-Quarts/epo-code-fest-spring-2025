@@ -39,6 +39,17 @@ def create_sdg_summary(sdg_summary: dict):
     conn.commit()
     cursor.close()
 
+    # Set is_analyzed to True for the patent in the patents table
+    update_patent_query = """
+    UPDATE patent
+    SET is_analyzed = TRUE
+    WHERE number = %s;
+    """
+    cursor = conn.cursor()
+    cursor.execute(update_patent_query, (sdg_summary["patent_number"],))
+    conn.commit()
+    cursor.close()
+
     # Close the database connection
     conn.close()
 

@@ -394,7 +394,7 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
         patent_text += f"{patent.de_abstract}\n"
 
     for desc in patent.description:
-        patent_text += f"{desc["description_number"]}: {desc["description_text"]}\n"
+        patent_text += f"{desc.description_number}: {desc.description_text}\n"
 
     patent_text = " ".join(patent_text.split()[:3000])
 
@@ -405,17 +405,16 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
 
     sdg_summary = []
     for sdg in sdgs:
-        sdg_summary.append(
-            {
-                "patent_number": patent_number,
-                "sdg": sdg,
-                "sdg_reason": reason,
-                "sdg_details": "tqt ca arrive fort"  # TODO
-            }
-        )
+        sdg_summary_detail = {
+            "patent_number": patent_number,
+            "sdg": sdg,
+            "sdg_reason": reason,
+            "sdg_details": "tqt ca arrive fort"  # TODO
+        }
+        sdg_summary.append(sdg_summary_detail)
+        sdg_summary_repository.create_sdg_summary(sdg_summary_detail)
 
     if sdg_summary:
-        sdg_summary_repository.create_sdg_summary(sdg_summary)
         return [SDGSummary(**summary) for summary in sdg_summary]
 
     logger.warning("No analysis results found.")

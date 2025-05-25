@@ -84,6 +84,7 @@ class Classify_patent():
                 if no valid SDGs (1-17) are found or if the input text is empty
                 or not a string.
         """
+        logger.debug(f"Extracting SDGs from text: {text[:100]}")
         if not text or not isinstance(text, str):
             # Modified to return ["None"] as per original logic for empty/invalid text
             return ["None"]
@@ -168,6 +169,7 @@ class Classify_patent():
                   Returns ["None"] if no SDGs are identified.
                 - A string containing the reason for the classification.
         """
+        logger.debug(f"Analyzing patent text: {patent_text[:100]}...")
         sdg_tag_content, reason = self.generate_response(patent_text)
         logger.debug(f"SDG Tag Content: {sdg_tag_content}")
         list_sdg = self._extract_sdgs(sdg_tag_content)
