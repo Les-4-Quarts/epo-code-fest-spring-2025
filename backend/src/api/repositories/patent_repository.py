@@ -656,6 +656,27 @@ def search_patents(text: str = None, patent_number: str = None, publication_date
     base_query += " ORDER BY patent.publication_date DESC, patent.number ASC LIMIT %s OFFSET %s;"
     params.extend([last - first, first])
 
+    # Get total count of patents matching the search criteria
+    count_query = """
+    SELECT COUNT(*)
+    FROM patent
+    """
+    if conditions:
+        count_query += " WHERE " + " AND ".join(conditions)
+    cursor.execute(count_query, params[:-2])  # Exclude pagination params
+    total_patents = cursor.fetchone()[0]
+    logger.debug(f"Total patents matching criteria: {total_patents}")
+    if total_patents == 0:
+        logger.debug("No patents found matching the search criteria.")
+        return {
+            "patents": [],
+            "total_count": 0,
+            "first": first,
+            "last": last,
+            "total_results": 0
+        }
+    logger.debug(f"Executing search query with params: {params}")
+
     # Execute the query
     cursor.execute(base_query, params)
     results = cursor.fetchall()
@@ -719,11 +740,12 @@ def search_patents(text: str = None, patent_number: str = None, publication_date
     # Close the database connection
     conn.close()
     logger.debug("Patent search completed successfully")
+
     return {
         "patents": patents,
-        "total_count": len(patents),
+        "total_count": total_patents,
         "first": first,
-        "last": min(last, len(patents)),
+        "last": min(last, total_patents),
         "total_results": len(patents)
     }
 

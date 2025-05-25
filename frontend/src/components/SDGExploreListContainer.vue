@@ -42,26 +42,45 @@ async function fetchPage(pageNumber: number) {
   if (pageNumber === page.value) {
     isLoading.value = true // Show loading spinner
   }
-  const first = (pageNumber - 1) * pageSize.value + 1
-  const last = pageNumber * pageSize.value + 1
-  try {
-    const response = await fetch(`${base_api_url}/patents`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Range: `${first}-${last}`,
-      },
-    })
-    const data: SearchResult = await response.json()
-    patentsCache.value[pageNumber] = data.patents
+  const first = (pageNumber - 1) * pageSize.value
+  const last = pageNumber * pageSize.value
+  if (!search.value.trim()) {
+    console.log('Search query is empty, fetching without search')
+    try {
+      const response = await fetch(`${base_api_url}/patents`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Range: `${first}-${last}`,
+        },
+      })
+      const data: SearchResult = await response.json()
+      patentsCache.value[pageNumber] = data.patents
 
-    if (totalPages.value === 0) {
       totalPages.value = Math.ceil(data.total_count / pageSize.value)
+    } catch (error) {
+      console.error(`Error fetching page ${pageNumber}:`, error)
+    } finally {
+      isLoading.value = false // Hide loading spinner
     }
-  } catch (error) {
-    console.error(`Error fetching page ${pageNumber}:`, error)
-  } finally {
-    isLoading.value = false // Hide loading spinner
+  } else {
+    try {
+      const response = await fetch(`${base_api_url}/patents/search?query=${search.value}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Range: `${first}-${last}`,
+        },
+      })
+      const data: SearchResult = await response.json()
+      patentsCache.value[pageNumber] = data.patents
+
+      totalPages.value = Math.ceil(data.total_count / pageSize.value)
+    } catch (error) {
+      console.error(`Error fetching page ${pageNumber} with search "${search.value}":`, error)
+    } finally {
+      isLoading.value = false // Hide loading spinner
+    }
   }
 }
 
@@ -196,6 +215,19 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
             width="200px"
             :iconSize="18"
             :delete-option="true"
+            @iconClick="
+              () => {
+                fetchPage(1)
+                patentsCache = {}
+              }
+            "
+            @deleteClick="
+              () => {
+                search = ''
+                fetchPage(1)
+                patentsCache = {}
+              }
+            "
           />
         </div>
         <div class="search-espacenet">

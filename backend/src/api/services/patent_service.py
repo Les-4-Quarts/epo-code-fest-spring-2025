@@ -208,7 +208,9 @@ def parse_cql_to_args(cql_query: str) -> dict:
         "publication_date": "publication_date",
         "country": "country",
         "applicant": "applicant",
-        "sdg": "sdgs"
+        "sdg": "sdgs",
+        "pn": "patent_number",  # Abbreviation for patent_number
+        "pd": "publication_date"  # Abbreviation for publication_date
     }
 
     # Initialize the arguments dictionary
@@ -225,6 +227,17 @@ def parse_cql_to_args(cql_query: str) -> dict:
                 args[python_key].extend(value.split(" OR "))
             else:
                 args[python_key] = value
+
+    # Handle cases where no explicit key-value pairs are provided
+    if not matches:
+        # Detect full or partial patent number formats
+        # e.g., EP0000000, EP0000000A1
+        if re.match(r'^[A-Z]{2}\d{7}[A-Z0-9]*$', cql_query):
+            args["patent_number"] = cql_query
+        elif re.match(r'^[A-Z]{2}\d+$', cql_query):  # e.g., EP1 (partial number)
+            args["patent_number"] = cql_query
+        else:
+            args["text"] = cql_query  # Default to text search
 
     # Log the parsed arguments
     logger.debug(f"Parsed arguments: {args}")
