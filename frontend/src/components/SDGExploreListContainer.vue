@@ -7,6 +7,7 @@ import type { SearchResult } from '@/types/SearchResult'
 import SpinnerLoader from './Loaders/SpinnerLoader.vue'
 import ItemList from './Lists/ItemList.vue'
 import BasicButton from './Buttons/BasicButton.vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   selectedSDGs: {
@@ -28,6 +29,7 @@ const searchEspacenet = defineModel('searchEspacenet', {
 const base_api_url = import.meta.env.VITE_BASE_API_URL
 const isLoading = ref(false)
 const isLoadingAnalysis = ref<string | null>(null)
+const router = useRouter()
 
 const patentsCache = ref<Record<number, Patent[]>>({}) // Dictionnaire pour stocker les pages préchargées
 const page = ref(1)
@@ -162,8 +164,10 @@ function analyze_patent(patent_number: string) {
       return response.json()
     })
     .then((data) => {
-      console.log('Analysis result:', data)
-      // Handle the analysis result as needed
+      router.push({
+        name: 'analyzed',
+        params: { id: patent_number },
+      })
     })
     .catch((error) => {
       console.error('Error during patent analysis:', error)
@@ -232,7 +236,10 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
           :action="
             patent.is_analyzed
               ? () => {
-                  console.log('View patent:', patent.number)
+                  router.push({
+                    name: 'analyzed',
+                    params: { id: patent.number },
+                  })
                 }
               : undefined
           "
