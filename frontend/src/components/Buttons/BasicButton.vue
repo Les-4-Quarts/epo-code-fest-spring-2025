@@ -79,7 +79,7 @@ const loadIcon = async (iconName: undefined | string) => {
     iconPath.value = module[iconName]
   } catch (error) {
     console.error(`Failed to load icon: ${iconName}`, error)
-    iconPath.value = 'undefined'
+    iconPath.value = undefined
   }
 }
 
@@ -106,7 +106,7 @@ watch(
     <SpinnerLoader v-if="isLoading" class="loader" :color="color" :size="1" />
     <template v-else>
       <SvgIcon
-        v-if="icon"
+        v-if="icon && iconPath"
         type="mdi"
         :path="iconPath"
         :size="iconSize"

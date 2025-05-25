@@ -80,14 +80,24 @@ const handleBlur = () => {
 const clearInput = () => {
   model.value = ''
   inputRef.value?.focus() // Refocus the input
+  emit('deleteClick')
 }
+
+const emit = defineEmits(['iconClick', 'deleteClick'])
 </script>
 
 <template>
   <div>
     <label>{{ label }}</label>
     <div class="input">
-      <SvgIcon v-if="iconPath" :path="iconPath" type="mdi" class="input-icon" :size="iconSize" />
+      <SvgIcon
+        v-if="iconPath"
+        :path="iconPath"
+        type="mdi"
+        class="input-icon"
+        :size="iconSize"
+        @click="$emit('iconClick')"
+      />
       <input
         ref="inputRef"
         v-model="model"
@@ -136,6 +146,7 @@ div {
     input {
       background-color: transparent;
       border: none;
+      color: var(--neutral-hightest);
 
       &:focus {
         outline: none;
@@ -146,6 +157,7 @@ div {
     .input-icon {
       margin-right: 5px;
       color: var(--neutral);
+      cursor: pointer;
     }
     .close-icon {
       cursor: pointer;
