@@ -20,6 +20,7 @@ dependencies = [
     "pdfminer-six (>=20250506,<20250507)",
     "easyocr (>=1.7.2,<2.0.0)",
     "pytesseract (>=0.3.13,<0.4.0)",
+    "standard-imghdr (>=3.13.0,<4.0.0)",
 ]
 
 [tool.poetry]
@@ -47,6 +48,10 @@ matplotlib = "^3.10.3"
 seaborn = "^0.13.2"
 scipy = "^1.15.3"
 plotly = "^6.1.1"
+peft = "^0.15.2"
+math-verify = "^0.7.0"
+trl = "^0.17.0"
+tensorboard = "^2.19.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
