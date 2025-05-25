@@ -13,7 +13,7 @@ database:
 ai:
   host: localhost:11434
   model: "qwen2.5:1.5b"
-  prompt_name: "sdg_label_prompt.md"
+  prompt_name: "sdg_label_prompt"
   huggingface_token: <YOUR_HUGGINGFACE_TOKEN>
   
 
