@@ -37,10 +37,11 @@ const props = defineProps({
         <h3>{{ title }}</h3>
         <div class="chips">
           <BasicChip
-            v-for="(sdg, index) in sdgs"
+            v-for="(sdg, index) in sdgs.filter((sdg) => sdg && sdg !== 'None')"
+            :key="index"
             :title="sdg"
             color="white"
-            :bgColor="sdg ? `var(--${sdg.slice(0, 3).toLowerCase()}-${sdg.slice(3)})` : undefined"
+            :bgColor="sdg ? `var(--${sdg.slice(0, 3).toLowerCase()}-${sdg.slice(3)})` : 'black'"
             compact
           />
         </div>

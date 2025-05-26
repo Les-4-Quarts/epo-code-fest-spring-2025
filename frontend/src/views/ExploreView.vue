@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import ListContainer from '@/components/SDGExploreListContainer.vue'
 import MapODD from '@/components/Map/MapODD.vue'
+import { ref } from 'vue'
+
+const selectedGoals = ref<number[]>([])
 </script>
 
 <template>
@@ -12,7 +15,7 @@ import MapODD from '@/components/Map/MapODD.vue'
         </div>
       </div>
     </div>
-    <ListContainer />
+    <ListContainer :selectedSDGs="selectedGoals.map((n: number) => `SDG${n}`)" />
   </div>
 </template>
 

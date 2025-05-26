@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BasicCard from '@/components/Cards/BasicCard.vue'
-import { computed, ref, watch, watchEffect, type PropType } from 'vue'
+import { computed, ref, watch, type PropType } from 'vue'
 import InputField from './Fields/InputField.vue'
 import type { Patent } from '@/types/Patent'
 import type { SearchResult } from '@/types/SearchResult'
@@ -44,7 +44,7 @@ async function fetchPage(pageNumber: number) {
   }
   const first = (pageNumber - 1) * pageSize.value
   const last = pageNumber * pageSize.value
-  if (!search.value.trim()) {
+  if (!search.value.trim() && props.selectedSDGs.length === 0) {
     try {
       const response = await fetch(`${base_api_url}/patents`, {
         method: 'GET',
@@ -64,13 +64,16 @@ async function fetchPage(pageNumber: number) {
     }
   } else {
     try {
-      const response = await fetch(`${base_api_url}/patents/search?query=${search.value}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Range: `${first}-${last}`,
+      const response = await fetch(
+        `${base_api_url}/patents/search?query=${search.value} sdgs=${props.selectedSDGs.join(',')}&ops_search=${searchEspacenet.value}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Range: `${first}-${last}`,
+          },
         },
-      })
+      )
       const data: SearchResult = await response.json()
       patentsCache.value[pageNumber] = data.patents
 
@@ -217,6 +220,7 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
             @iconClick="
               () => {
                 fetchPage(1)
+                page = 1
                 patentsCache = {}
               }
             "
@@ -224,6 +228,7 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
               () => {
                 search = ''
                 fetchPage(1)
+                page = 1
                 patentsCache = {}
               }
             "
