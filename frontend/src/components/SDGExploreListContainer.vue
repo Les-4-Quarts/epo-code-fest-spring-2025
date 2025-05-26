@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import BasicCard from '@/components/Cards/BasicCard.vue'
-import { computed, ref, watch, watchEffect, type PropType } from 'vue'
+import { computed, ref, watch, type PropType } from 'vue'
 import InputField from './Fields/InputField.vue'
 import type { Patent } from '@/types/Patent'
 import type { SearchResult } from '@/types/SearchResult'
 import SpinnerLoader from './Loaders/SpinnerLoader.vue'
 import ItemList from './Lists/ItemList.vue'
 import BasicButton from './Buttons/BasicButton.vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   selectedSDGs: {
@@ -27,6 +28,8 @@ const searchEspacenet = defineModel('searchEspacenet', {
 
 const base_api_url = import.meta.env.VITE_BASE_API_URL
 const isLoading = ref(false)
+const isLoadingAnalysis = ref<string | null>(null)
+const router = useRouter()
 
 const patentsCache = ref<Record<number, Patent[]>>({}) // Dictionnaire pour stocker les pages préchargées
 const page = ref(1)
@@ -39,26 +42,48 @@ async function fetchPage(pageNumber: number) {
   if (pageNumber === page.value) {
     isLoading.value = true // Show loading spinner
   }
-  const first = (pageNumber - 1) * pageSize.value + 1
-  const last = pageNumber * pageSize.value + 1
-  try {
-    const response = await fetch(`${base_api_url}/patents`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Range: `${first}-${last}`,
-      },
-    })
-    const data: SearchResult = await response.json()
-    patentsCache.value[pageNumber] = data.patents
+  const first = (pageNumber - 1) * pageSize.value
+  const last = pageNumber * pageSize.value
+  if (!search.value.trim() && props.selectedSDGs.length === 0) {
+    try {
+      const response = await fetch(`${base_api_url}/patents`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Range: `${first}-${last}`,
+        },
+      })
+      const data: SearchResult = await response.json()
+      patentsCache.value[pageNumber] = data.patents
 
-    if (totalPages.value === 0) {
       totalPages.value = Math.ceil(data.total_count / pageSize.value)
+    } catch (error) {
+      console.error(`Error fetching page ${pageNumber}:`, error)
+    } finally {
+      isLoading.value = false // Hide loading spinner
     }
-  } catch (error) {
-    console.error(`Error fetching page ${pageNumber}:`, error)
-  } finally {
-    isLoading.value = false // Hide loading spinner
+  } else {
+    try {
+      const response = await fetch(
+        // ${searchEspacenet.value || props.selectedSDGs.length === 0 ? '' : ` sdgs=${props.selectedSDGs.join(',')}`} => allows to search by SDGs only if Espacenet is not selected and at least one SDG is selected
+        `${base_api_url}/patents/search?query=${search.value}${searchEspacenet.value || props.selectedSDGs.length === 0 ? '' : ` sdgs=${props.selectedSDGs.join(',')}`}&ops_search=${searchEspacenet.value}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Range: `${first}-${last}`,
+          },
+        },
+      )
+      const data: SearchResult = await response.json()
+      patentsCache.value[pageNumber] = data.patents
+
+      totalPages.value = Math.ceil(data.total_count / pageSize.value)
+    } catch (error) {
+      console.error(`Error fetching page ${pageNumber} with search "${search.value}":`, error)
+    } finally {
+      isLoading.value = false // Hide loading spinner
+    }
   }
 }
 
@@ -74,7 +99,6 @@ async function preloadPages() {
   // Load the first 5 pages if they are not already loaded
   for (let i = 1; i <= Math.min(5, totalPages.value); i++) {
     if (!patentsCache.value[i]) {
-      console.log('Preloading page:', i)
       pagesToLoad.push(i)
     }
   }
@@ -82,7 +106,6 @@ async function preloadPages() {
   // Load the last 5 pages if they are not already loaded
   for (let i = Math.max(1, totalPages.value - 4); i <= totalPages.value; i++) {
     if (!patentsCache.value[i]) {
-      console.log('Preloading page:', i)
       pagesToLoad.push(i)
     }
   }
@@ -90,7 +113,6 @@ async function preloadPages() {
   // Load the pages around the current page if they are not already loaded
   for (let i = start; i <= end; i++) {
     if (!patentsCache.value[i]) {
-      console.log('Preloading page:', i)
       pagesToLoad.push(i)
     }
   }
@@ -142,11 +164,51 @@ watch(
       await fetchPage(newPage)
     }
     await preloadPages()
-    console.log('Loaded pages:', Object.keys(patentsCache.value))
   },
 )
 
+function analyze_patent(patent_number: string) {
+  if (isLoadingAnalysis.value) {
+    console.warn('Analysis already in progress, please wait.')
+    return
+  }
+  isLoadingAnalysis.value = patent_number
+  fetch(`${base_api_url}/patents/analyze/${patent_number}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Error analyzing patent ${patent_number}: ${response.statusText}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      router.push({
+        name: 'analyzed',
+        params: { id: patent_number },
+      })
+    })
+    .catch((error) => {
+      console.error('Error during patent analysis:', error)
+    })
+    .finally(() => {
+      isLoadingAnalysis.value = null
+    })
+}
+
 const currentPatents = computed(() => patentsCache.value[page.value] || [])
+
+watch(
+  () => searchEspacenet.value,
+  () => {
+    page.value = 1
+    patentsCache.value = {}
+    fetchPage(1)
+  },
+)
 </script>
 
 <template>
@@ -165,6 +227,21 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
             width="200px"
             :iconSize="18"
             :delete-option="true"
+            @iconClick="
+              () => {
+                fetchPage(1)
+                page = 1
+                patentsCache = {}
+              }
+            "
+            @deleteClick="
+              () => {
+                search = ''
+                fetchPage(1)
+                page = 1
+                patentsCache = {}
+              }
+            "
           />
         </div>
         <div class="search-espacenet">
@@ -196,12 +273,19 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
                   text: 'Start analysis',
                   color: 'var(--neutral-lowest)',
                   bgColor: 'var(--primary-highter)',
+                  action: () => {
+                    analyze_patent(patent.number)
+                  },
+                  isLoading: isLoadingAnalysis === patent.number,
                 }
           "
           :action="
             patent.is_analyzed
               ? () => {
-                  console.log('View patent:', patent.number)
+                  router.push({
+                    name: 'analyzed',
+                    params: { id: patent.number },
+                  })
                 }
               : undefined
           "

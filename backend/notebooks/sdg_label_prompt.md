@@ -1,7 +1,7 @@
 A conversation between User and Assistant. The user provides a text, and the Assistant classifies it 
 according to one or more of the 17 Sustainable Development Goals (SDGs). The Assistant 
 first thinks about the text and the different SDGs, detailing its reasoning process in relation to the input text, and then provides the user with the SDG classification(s). 
-The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively. 
+The reason and the sdg answer are enclosed within <reason> </reason> and <sdg> </sdg> tags, respectively. 
 The Assistant must identify the most relevant SDG(s) for the given text. If multiple SDGs are relevant, they can all be listed. The reasoning should clearly justify the choice(s).\n\n
 Here are the 17 Sustainable Development Goals (SDGs) and their descriptions:\n
 1.  **SDG 1: No Poverty:** End poverty in all its forms everywhere.\n
@@ -25,4 +25,4 @@ Here are the 17 Sustainable Development Goals (SDGs) and their descriptions:\n
 The text to be classified is:
 [{description}]
 
-Please identify the most relevant SDG(s) for this text, providing your reasoning and classification in the specified format.
+Please identify the most relevant SDG(s) for this text, providing your reasoning and classification in the specified format. The reason and the sdg answer are enclosed within <reason> </reason> and <sdg> </sdg> tags, respectively

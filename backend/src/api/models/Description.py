@@ -9,5 +9,3 @@ class Description(BaseModel):
                                description="The unique identifier for the patent.", examples=["EP0000000"])
     description_text: str = Field(..., title="Description Text",
                                   description="The text of the description.", examples=["This is an example description text."])
-    sdg: Optional[str] = Field(..., title="SDG",
-                               description="The SDG of the description.", examples=["SDG 1: No Poverty"])

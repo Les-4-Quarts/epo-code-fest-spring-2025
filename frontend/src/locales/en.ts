@@ -13,4 +13,7 @@ export default {
     "analyze.fileSelected": "File selected",
     "analyze.error.fileType": "File type not supported",
     "analyze.about": "About your patent",
+    "analyze.applicants": "Applicants",
+    "analyze.abstract": "Abstract",
+    "analyze.sdg": "SDG",
 }
