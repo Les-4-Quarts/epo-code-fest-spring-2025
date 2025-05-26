@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Header, UploadFile
+from api.models.Stats import Stats
+from fastapi import APIRouter, HTTPException, Header, Query, UploadFile
 
 from api.models.SDGSummary import SDGSummary
 from api.models.Patent import Patent, FullPatent, PatentList
@@ -49,6 +50,73 @@ async def get_all_patents(
 
     # Return the patents within the specified range
     return patents
+
+
+@router.get("/stats", response_model=Stats)
+async def get_patent_stats(sdgs: str = Query(..., description="Comma-separated list of SDG numbers (1-17)")) -> Stats:
+    """
+    Get patent statistics by SDG and country.
+
+    Args:
+        sdgs (str): Comma-separated list of SDG numbers (1-17) to get statistics for.
+                   Example: "1,3,7" or "5"
+
+    Returns:
+        dict: Patent statistics organized by SDG and country.
+
+    Example response:
+        ```
+        {
+            "stats": {
+                "1": {
+                    "US": 150,
+                    "EP": 85,
+                    "FR": 42
+                },
+                "3": {
+                    "US": 203,
+                    "EP": 112,
+                    "CN": 89
+                }
+            },
+            "sdgs_processed": [1, 3],
+            "total_patents": 748,
+            "countries_found": ["US", "EP", "FR", "DE", "CN"]
+        }
+        ```
+    """
+    logger.debug(f"Getting patent statistics for SDGs: {sdgs}")
+
+    # Parse the comma-separated SDG string into a list of integers
+    try:
+        sdg_list = [int(sdg.strip()) for sdg in sdgs.split(",") if sdg.strip()]
+    except ValueError as e:
+        logger.error(f"Invalid SDG format: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid SDG format. Please provide comma-separated integers between 1 and 17."
+        )
+
+    # Validate SDG numbers
+    invalid_sdgs = [sdg for sdg in sdg_list if not (1 <= sdg <= 17)]
+    if invalid_sdgs:
+        logger.error(f"Invalid SDG numbers: {invalid_sdgs}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid SDG numbers: {invalid_sdgs}. SDGs must be between 1 and 17."
+        )
+
+    # Call the service function to get statistics
+    try:
+        stats_result = patent_service.get_stats(sdg_list)
+    except Exception as e:
+        logger.error(f"Error getting patent statistics: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Error retrieving patent statistics."
+        )
+
+    return stats_result
 
 
 @router.get("/{patent_number}", response_model=Patent)

@@ -1,5 +1,6 @@
 from io import BytesIO
 import re
+from api.models.Stats import Stats
 from api.services import ops_service
 from fastapi import UploadFile
 from api.repositories import patent_repository, sdg_summary_repository
@@ -467,6 +468,28 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
 
     logger.warning("No analysis results found.")
     return []
+
+
+def get_stats(sdgs: list[int]) -> Stats:
+    """
+    Get statistics for patents related to specific SDGs.
+
+    Args:
+        sdgs (list[int]): A list of SDG numbers to filter patents by.
+
+    Returns:
+        dict: A dictionary containing the count of patents for each SDG.
+    """
+    logger.debug(f"Getting patent stats for SDGs: {sdgs}")
+
+    # Call the repository function to get patent stats
+    stats = sdg_summary_repository.get_stats(sdgs)
+
+    if not stats:
+        logger.warning("No patent stats found for the given SDGs.")
+        return {}
+
+    return Stats(**stats)
 
 
 if __name__ == "__main__":

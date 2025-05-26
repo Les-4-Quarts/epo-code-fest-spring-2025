@@ -7,8 +7,6 @@ import { ISONumtoISO2, ISONumtoISO3 } from 'country-code-switch'
 import type { Objects, Topology } from 'topojson-specification'
 import type { GeoJsonProperties } from 'geojson'
 
-import type { FeatureCollection } from 'geojson'
-
 const base_api_url = import.meta.env.VITE_BASE_API_URL
 const { t } = useI18n()
 const selectedODD = ref<number | null>(null)
