@@ -4,11 +4,14 @@ import { onMounted, ref, watch } from 'vue'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import { ISONumtoISO2, ISONumtoISO3 } from 'country-code-switch'
-import BasicCard from '@/components/Cards/BasicCard.vue'
+import type { Objects, Topology } from 'topojson-specification'
+import type { GeoJsonProperties } from 'geojson'
+
+import type { FeatureCollection } from 'geojson'
 
 const base_api_url = import.meta.env.VITE_BASE_API_URL
 const { t } = useI18n()
-const selectedODD = ref(null)
+const selectedODD = ref<number | null>(null)
 const selectedODDTitle = ref('All selected')
 const selectedColor = ref('#cccccc')
 // const selectedGoals = ref([])
@@ -60,14 +63,20 @@ let oddTitles = [
   t('sdg.17'),
 ]
 
-const countryDataByOdd = ref({})
+const countryDataByOdd = ref<Record<number, Record<string, number>>>({})
 
-let svg, g, path, projection, zoom
+let svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>,
+  g: d3.Selection<SVGGElement, unknown, HTMLElement, any>,
+  path: d3.GeoPath<any, d3.GeoPermissibleObjects> | null = null,
+  projection: d3.GeoProjection | null = null,
+  zoom: d3.ZoomBehavior<Element, unknown>
+
+const emit = defineEmits(['country-selected', 'update-selection'])
 let currentTransform = d3.zoomIdentity
-let countries
+let countries: d3.Selection<SVGPathElement, d3.GeoPermissibleObjects, SVGGElement, unknown>
 
 const generateMockData = () => {
-  const mockData = {}
+  const mockData: Record<number, Record<string, number>> = {}
   for (let i = 1; i <= 18; i++) {
     mockData[i] = {}
 
@@ -111,34 +120,12 @@ const updateTitleLanguage = () => {
   ]
 }
 
-// const dataFromAPI = async () => {
-//   let dataFromApi = {}
-//
-//   fetch(`${base_api_url}/patents`, {
-//     method: 'GET',
-//   })
-//     .then((response) => {
-//       if (!response.ok) {
-//         throw new Error('Network response was not ok')
-//       }
-//       return response.json()
-//     })
-//     .then((data) => {
-//       console.log('File uploaded successfully:', data)
-//       dataFromApi = data;
-//     })
-//     .catch((error) => {
-//       console.error('Error uploading file:', error)
-//     })
-//
-//   return dataFromApi;
-// };
-
 // Fonction pour sélectionner un ODD
-const selectODD = (oddId) => {
+const selectODD = (oddId: number | null) => {
   selectedODD.value = oddId
   if (oddId) {
-    selectedColor.value = odds.value.find((odd) => odd.id === oddId).color
+    const selectedOdd = odds.value.find((odd) => odd.id === oddId)
+    selectedColor.value = selectedOdd ? selectedOdd.color : '#cccccc'
   } else {
     selectedColor.value = '#cccccc'
   }
@@ -149,7 +136,7 @@ const updateMapColors = () => {
   if (!countries) return
 
   let singleGoal = null
-  let multipleGoals = []
+  let multipleGoals: any[] = []
 
   if (props.selectedGoals.length === 1) {
     singleGoal = props.selectedGoals[0] // ID ODD
@@ -161,21 +148,25 @@ const updateMapColors = () => {
     .transition()
     .duration(500)
     .attr('fill', (d) => {
-      const countryCode = d.id !== undefined ? ISONumtoISO3(d.id) : null
+      const countryCode =
+        (d as { id: number | undefined }).id !== undefined
+          ? ISONumtoISO3((d as { id: number | undefined }).id)
+          : null
 
       if (!countryCode) return '#b7b7b7'
 
       let value = 0
 
       if (singleGoal) {
-        const currentData = countryDataByOdd.value[singleGoal]
+        const currentData = countryDataByOdd.value[singleGoal as number]
         value = currentData[countryCode] || 0
-        const maxValue = Math.max(...Object.values(currentData))
+        const maxValue = Math.max(...Object.values(currentData as Record<string, number>))
         const intensity = value / maxValue
-        selectedColor.value = odds.value.find((odd) => odd.id === singleGoal).color
+        const selectedOdd = odds.value.find((odd) => odd.id === singleGoal)
+        selectedColor.value = selectedOdd ? selectedOdd.color : '#cccccc'
         return d3.interpolate('#b7b7b7', selectedColor.value)(intensity)
       } else if (multipleGoals.length > 1) {
-        let totalValues = []
+        let totalValues: Record<string, any> = {}
         multipleGoals.forEach((goalId) => {
           const data = countryDataByOdd.value[goalId]
           if (data && data[countryCode]) {
@@ -204,15 +195,17 @@ const updateLegendTitle = () => {
         props.selectedGoals.length + ' ' + t('explore.legendTitle.moreSelected')
     }
   } else if (props.selectedGoals.length == 1) {
-    selectedODDTitle.value = oddTitles[props.selectedGoals[0]]
+    selectedODDTitle.value = oddTitles[props.selectedGoals[0] as number]
   } else {
     selectedODDTitle.value = t('explore.legendTitle.noSelected')
   }
 }
 
 const createMap = async () => {
-  const width = document.getElementById('world-map').clientWidth
-  const height = document.getElementById('world-map').clientHeight
+  const mapElementWidth = document.getElementById('world-map')
+  const width = mapElementWidth ? mapElementWidth.clientWidth : 0
+  const mapElementHeight = document.getElementById('world-map')
+  const height = mapElementHeight ? mapElementHeight.clientHeight : 0
 
   projection = d3
     .geoMercator()
@@ -231,7 +224,7 @@ const createMap = async () => {
     .scaleExtent([1, 8])
     .on('zoom', (event) => {
       currentTransform = event.transform
-      g.attr('transform', currentTransform)
+      g.attr('transform', currentTransform.toString())
 
       g.selectAll('.country-label')
         .attr('font-size', () => {
@@ -240,24 +233,30 @@ const createMap = async () => {
         .style('visibility', currentTransform.k > 2 ? 'visible' : 'hidden')
     })
 
-  svg.call(zoom)
+  svg.call(
+    zoom as unknown as (selection: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>) => void,
+  )
 
   try {
-    const worldData = await d3.json(
+    const worldData = (await d3.json(
       'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
-    )
+    )) as Topology<Objects<GeoJsonProperties>>
     const geojson = feature(worldData, worldData.objects.countries)
 
     countries = g
-      .selectAll('path')
-      .data(geojson.features)
+      .selectAll<SVGPathElement, d3.GeoPermissibleObjects>('path')
+      .data(
+        'features' in geojson
+          ? (geojson.features as d3.GeoPermissibleObjects[])
+          : [geojson as d3.GeoPermissibleObjects],
+      )
       .enter()
       .append('path')
-      .attr('d', path)
+      .attr('d', path as d3.ValueFn<SVGPathElement, unknown, string>)
       .attr('fill', '#f0f0f0')
       .attr('stroke', '#ccc')
       .attr('stroke-width', 0.5)
-      .attr('data-code', (d) => d.id)
+      .attr('data-code', (d) => ((d as { id: number | undefined }).id ?? '').toString())
       .on('mouseover', function () {
         d3.select(this).attr('stroke-width', 1.5).attr('stroke', '#ccc')
       })
@@ -266,23 +265,26 @@ const createMap = async () => {
       })
       .on('click', (event, d) => {
         event.stopPropagation()
-        const [[x0, y0], [x1, y1]] = path.bounds(d)
+        if (!path) return
+        const [[x0, y0], [x1, y1]] = path.bounds(d as d3.GeoPermissibleObjects)
 
         svg
           .transition()
           .duration(750)
           .call(
-            zoom.transform,
+            zoom.transform as unknown as (
+              transition: d3.Transition<SVGSVGElement, unknown, HTMLElement, any>,
+              transform: d3.ZoomTransform,
+            ) => void,
             d3.zoomIdentity
               .translate(width / 2, height / 2)
               .scale(Math.min(8, 0.9 / Math.max((x1 - x0) / width, (y1 - y0) / height)))
               .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
           )
-
-        const countryCodeNum = d.id
+        const countryCodeNum = (d as { id: number | undefined }).id
         const countryCode2 = ISONumtoISO2(countryCodeNum)
         const countryCode3 = ISONumtoISO3(countryCodeNum)
-        const countryName = d.properties.name
+        const countryName = (d as unknown as { properties: { name: string } }).properties.name
         const oddId = selectedODD.value
         const count = oddId ? countryDataByOdd.value[oddId] || 0 : 0
 
@@ -297,12 +299,12 @@ const createMap = async () => {
       })
 
     g.selectAll('text')
-      .data(geojson.features)
+      .data('features' in geojson ? geojson.features : [])
       .enter()
       .append('text')
       .attr('class', 'country-label')
-      .attr('x', (d) => path.centroid(d)[0])
-      .attr('y', (d) => path.centroid(d)[1])
+      .attr('x', (d) => (path ? path.centroid(d as d3.GeoPermissibleObjects)[0] : 0))
+      .attr('y', (d) => (path ? path.centroid(d as d3.GeoPermissibleObjects)[1] : 0))
       .attr('text-anchor', 'middle')
       .attr('fill', '#333')
       .attr('font-size', '8px')
@@ -310,7 +312,16 @@ const createMap = async () => {
       .attr('pointer-events', 'none')
 
     svg.on('click', () => {
-      svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity)
+      return svg
+        .transition()
+        .duration(750)
+        .call(
+          zoom.transform as unknown as (
+            transition: d3.Transition<SVGSVGElement, unknown, HTMLElement, any>,
+            transform: d3.ZoomTransform,
+          ) => void,
+          d3.zoomIdentity,
+        )
     })
 
     countryDataByOdd.value = generateMockData()
@@ -336,7 +347,10 @@ const createMap = async () => {
         .transition()
         .duration(750)
         .call(
-          zoom.transform,
+          zoom.transform as unknown as (
+            transition: d3.Transition<SVGSVGElement, unknown, HTMLElement, any>,
+            transform: d3.ZoomTransform,
+          ) => void,
           d3.zoomIdentity
             .translate(width / 2, height / 2)
             .scale(Math.min(8, 0.7 / Math.max((x1 - x0) / width, (y1 - y0) / height)))
