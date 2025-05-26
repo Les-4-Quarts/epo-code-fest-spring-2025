@@ -1,6 +1,8 @@
 import re
+import os
 from typing import Tuple, List
 from api.config.logging_config import logger
+from ai.models.prompt.sdg_label_prompt import sdg_label_prompt
 
 
 class Classify_patent():
@@ -23,8 +25,7 @@ class Classify_patent():
                 This template should contain a placeholder "{description}"
                 which will be replaced by the patent text.
         """
-        with open(f"src/ai/models/prompt/{prompt_name}", "r") as f:
-            self.prompt_template = f.read()
+        self.prompt_name = prompt_name
         self.model_name = model_name
         self.client = client
         self.temperature = temperature
@@ -138,8 +139,7 @@ class Classify_patent():
                 - The content extracted from the <sdg> tag in the model's response.
                 - The content extracted from the <reason> tag in the model's response.
         """
-        formatted_prompt = self.prompt_template.replace(
-            "{description}", patent_text)
+        formatted_prompt = sdg_label_prompt(self.prompt_name, patent_text)
         # Assuming self.client.generate returns a dictionary-like object
         # with a 'response' key.
         output = self.client.generate(
