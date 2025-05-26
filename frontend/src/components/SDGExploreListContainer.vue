@@ -45,7 +45,6 @@ async function fetchPage(pageNumber: number) {
   const first = (pageNumber - 1) * pageSize.value
   const last = pageNumber * pageSize.value
   if (!search.value.trim()) {
-    console.log('Search query is empty, fetching without search')
     try {
       const response = await fetch(`${base_api_url}/patents`, {
         method: 'GET',
