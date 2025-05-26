@@ -110,7 +110,6 @@ function handleFileSend() {
         return response.json()
       })
       .then((data) => {
-        console.log('File uploaded successfully:', data)
         analysisResult.value = data
       })
       .catch((error) => {

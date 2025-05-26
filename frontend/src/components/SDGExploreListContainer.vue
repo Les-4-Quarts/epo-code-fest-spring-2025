@@ -44,7 +44,10 @@ async function fetchPage(pageNumber: number) {
   }
   const first = (pageNumber - 1) * pageSize.value
   const last = pageNumber * pageSize.value
-  if (!search.value.trim() && props.selectedSDGs.length === 0) {
+  if (
+    !search.value.trim() &&
+    (props.selectedSDGs.length === 0 || props.selectedSDGs.length === 18)
+  ) {
     try {
       const response = await fetch(`${base_api_url}/patents`, {
         method: 'GET',
@@ -66,7 +69,7 @@ async function fetchPage(pageNumber: number) {
     try {
       const response = await fetch(
         // ${searchEspacenet.value || props.selectedSDGs.length === 0 ? '' : ` sdgs=${props.selectedSDGs.join(',')}`} => allows to search by SDGs only if Espacenet is not selected and at least one SDG is selected
-        `${base_api_url}/patents/search?query=${search.value}${searchEspacenet.value || props.selectedSDGs.length === 0 ? '' : ` sdgs=${props.selectedSDGs.join(',')}`}&ops_search=${searchEspacenet.value}`,
+        `${base_api_url}/patents/search?query=${search.value}${searchEspacenet.value || props.selectedSDGs.length === 0 || props.selectedSDGs.length === 18 ? '' : ` sdgs=${props.selectedSDGs.join(' OR ')}`}&ops_search=${searchEspacenet.value}`,
         {
           method: 'POST',
           headers: {
@@ -209,6 +212,15 @@ watch(
     fetchPage(1)
   },
 )
+
+watch(
+  () => props.selectedSDGs,
+  () => {
+    page.value = 1
+    patentsCache.value = {}
+    fetchPage(1)
+  },
+)
 </script>
 
 <template>
@@ -265,9 +277,7 @@ watch(
             patent.is_analyzed
               ? {
                   icon: 'mdiChevronRight',
-                  action: () => {
-                    console.log('View patent:', patent.number)
-                  },
+                  action: () => {},
                 }
               : {
                   text: 'Start analysis',
