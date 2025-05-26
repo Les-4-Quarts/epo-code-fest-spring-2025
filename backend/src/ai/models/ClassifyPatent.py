@@ -5,7 +5,7 @@ from api.config.logging_config import logger
 from ai.models.prompt.sdg_label_prompt import sdg_label_prompt
 
 
-class Classify_patent():
+class ClassifyPatent():
     """
     Classifies patent text to identify relevant Sustainable Development Goals (SDGs).
 
@@ -16,7 +16,7 @@ class Classify_patent():
     """
 
     def __init__(self, client, model_name: str, prompt_name: str, temperature=0.2, max_tokens=20000):
-        """Initializes the Classify_patent instance.
+        """Initializes the ClassifyPatent instance.
 
         Args:
             client: The client object used to interact with the language model.
@@ -50,6 +50,7 @@ class Classify_patent():
                   whitespace.
                 Returns empty strings for either if the corresponding tag is not found.
         """
+        text = text.split("</think>")[1]
         reason_match = re.search(r'<reason>(.*?)</reason>', text, re.DOTALL)
         sdg_match = re.search(r'<sdg>(.*?)</sdg>', text, re.DOTALL)
 

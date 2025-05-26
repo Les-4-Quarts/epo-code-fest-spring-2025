@@ -20,35 +20,16 @@ sdg_description = {
 }
 
 
-def prompt_retreval_sdg(text, sdg):
+def sdg_citation_prompt(text, sdg):
 
-    prompt = f"""You are an AI assistant specializing in information retrieval and text analysis. Your task is to analyze a given input text and identify sections pertinent to a specified Sustainable Development Goal (SDG) classification. You will then provide a concise explanation for this classification based on the retrieved information.
-    
-    **Instructions for the Assistant:**
+    prompt = f"""You are an AI assistant specializing in citation and analysis.
 
-    1.  You will be provided with an `Input Text` and `SDG Classification Details`.
-    2.  Carefully read and understand both the `Input Text` and the `SDG Classification Details` (which includes the main goal, specific targets, and example innovations for that SDG).
-    3.  From the `Input Text`, retrieve the exact phrases, sentences, or pertinent segments that directly relate to the provided `SDG Classification Details`.
-    4.  Based on the retrieved segments, provide a short, clear explanation of why the `Input Text` is classified under this specific SDG. Your explanation should explicitly link the retrieved text segments to the aspects of the SDG (e.g., its main goal, specific targets, or example innovations).
+    Your task is to analyze the text and identify pertinent citations related to this Sustainable Development Goal (SDG) **{sdg_description[sdg]}**. You also need to add a short explanation about the link between the SDG and the citation. The citation and the explanation are enclosed within `<citation> </citation>` and `<explanation> </explanation>` tags, respectively.
 
-    **Input Data Structure:**
+    From the text, cite the exact phrases, sentences, or pertinent segments that directly relate to the provided **{sdg}**. Based on the cited segments, provide a short, clear explanation of why the text is classified under this specific SDG. Your explanation should explicitly link the citation text segments to the aspects of the SDG (e.g., its main goal, specific targets, or example innovations).
 
-    You will receive the information in the following format:
+    The text to analyze is:
+    [{text}]
 
-    Input Text:
-    ```
-    {text}
-    ```
-
-    SDG Classification Details:
-    ```
-    {sdg_description[sdg]}
-    ```
-
-    **Output Format:**
-
-    You MUST generate your response using the following exact structure. The retrieved information and the explanation must be enclosed within `<retrival> </retrival>` and `<explanation> </explanation>` tags, respectively:
-
-    <retrival>[Insert the exact pertinent phrases/sentences retrieved from the `Input Text` here. If multiple segments, list them clearly, perhaps separated by newlines.]</retrival>
-    <explanation>[Insert your concise explanation here, linking the retrieved segments to the specific `SDG Classification Details`.]</explanation>"""
+    Please Providing your exact citation from the text and explanation in the specified format. The citation and the explanation are enclosed within `<citation> </citation>` and `<explanation> </explanation>` tags, respectively."""
     return prompt

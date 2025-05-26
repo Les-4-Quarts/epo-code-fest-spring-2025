@@ -5,7 +5,8 @@ from api.repositories import patent_repository, sdg_summary_repository
 from api.models.Patent import Patent, FullPatent, PatentList
 from api.models.SDGSummary import SDGSummary
 from api.config.logging_config import logger
-from ai.models.classify_patent import Classify_patent
+from ai.models.ClassifyPatent import ClassifyPatent
+from ai.models.CitationPatent import CitationPatent
 
 
 from api.config.ai_config import ai_client, ai_model, prompt_name
@@ -268,18 +269,19 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
     logger.debug(f"Filtered text: {filtered_text[:500]}...")
 
     # Call the repository function to analyze the patent PDF
-    model = Classify_patent(ai_client, ai_model, prompt_name)
-
-    sdgs, reason = model.analyze_patent(filtered_text)
+    classifier = ClassifyPatent(ai_client, ai_model, "sdg_label_prompt")
+    model_citation = CitationPatent(ai_client, ai_model)
+    sdgs, reason = classifier.analyze_patent(filtered_text)
 
     sdg_summary = []
     for sdg in sdgs:
+        sdg_reason, sdg_details = model_citation.citation(filtered_text, sdg)
         sdg_summary.append(
             {
                 "patent_number": None,
                 "sdg": sdg,
-                "sdg_reason": reason,
-                "sdg_details": "tqt ca arrive fort"  # TODO
+                "sdg_reason": sdg_reason,
+                "sdg_details": sdg_details
             }
         )
 
@@ -399,23 +401,23 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
     patent_text = " ".join(patent_text.split()[:3000])
 
     # Call the repository function to analyze the patent PDF
-    model = Classify_patent(ai_client, ai_model, prompt_name)
-
-    sdgs, reason = model.analyze_patent(patent_text)
+    classifier = ClassifyPatent(ai_client, ai_model, "sdg_label_prompt")
+    model_citation = CitationPatent(ai_client, ai_model)
+    sdgs, reason = classifier.analyze_patent(patent_text)
 
     sdg_summary = []
     for sdg in sdgs:
-        sdg_summary.append(
-            {
-                "patent_number": patent_number,
-                "sdg": sdg,
-                "sdg_reason": reason,
-                "sdg_details": "tqt ca arrive fort"  # TODO
-            }
-        )
+        sdg_reason, sdg_details = model_citation.citation(patent_text, sdg)
+        sdg_summary_detail = {
+            "patent_number": patent_number,
+            "sdg": sdg,
+            "sdg_reason": sdg_reason,
+            "sdg_details": sdg_details
+        }
+        sdg_summary.append(sdg_summary_detail)
+        sdg_summary_repository.create_sdg_summary(sdg_summary_detail)
 
     if sdg_summary:
-        sdg_summary_repository.create_sdg_summary(sdg_summary)
         return [SDGSummary(**summary) for summary in sdg_summary]
 
     logger.warning("No analysis results found.")
