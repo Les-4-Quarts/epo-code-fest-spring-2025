@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import ListContainer from '@/components/SDGExploreListContainer.vue'
 import MapODD from '@/components/Map/MapODD.vue'
+import SDGList from '@/components/SDGList/SDGList.vue'
+import { ref } from 'vue'
+const selectedGoals = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18])
+
+function handleSDGSelection(list) {
+  selectedGoals.value = list
+}
 </script>
 
 <template>
@@ -8,11 +15,12 @@ import MapODD from '@/components/Map/MapODD.vue'
     <div class="explore-content">
       <div class="map-section">
         <div class="map-wrapper">
-          <MapODD ref="mapODD" />
+          <MapODD ref="mapODD" :selected-goals="selectedGoals" />
+          <SDGList @update-selection="handleSDGSelection"></SDGList>
         </div>
       </div>
     </div>
-    <ListContainer />
+    <ListContainer :selected-sdgs="selectedGoals" />
   </div>
 </template>
 

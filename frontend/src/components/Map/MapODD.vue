@@ -1,16 +1,24 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import { ISONumtoISO2, ISONumtoISO3 } from 'country-code-switch'
 import BasicCard from '@/components/Cards/BasicCard.vue'
 
 const base_api_url = import.meta.env.VITE_BASE_API_URL
-const language = useI18n()
+const { t } = useI18n()
 const selectedODD = ref(null)
+const selectedODDTitle = ref('All selected')
 const selectedColor = ref('#cccccc')
-const selectedGoals = ref([])
+// const selectedGoals = ref([])
+
+const props = defineProps({
+  selectedGoals: {
+    type: Array,
+    default: () => ref([]),
+  },
+})
 
 const odds = ref([
   { id: 1, color: '#E5243B' },
@@ -32,24 +40,24 @@ const odds = ref([
   { id: 17, color: '#19486A' },
 ])
 
-const oddTitles = [
-  'Pas de pauvreté',
-  'Faim "zéro"',
-  'Bonne santé et bien-être',
-  'Éducation de qualité',
-  'Égalité entre les sexes',
-  'Eau propre et assainissement',
-  "Énergie propre et d'un coût abordable",
-  'Travail décent et croissance économique',
-  'Industrie, innovation et infrastructure',
-  'Inégalités réduites',
-  'Villes et communautés durables',
-  'Consommation et production responsables',
-  'Mesures relatives à la lutte contre les changements climatiques',
-  'Vie aquatique',
-  'Vie terrestre',
-  'Paix, justice et institutions efficaces',
-  'Partenariats pour la réalisation des objectifs',
+let oddTitles = [
+  t('sdg.1'),
+  t('sdg.2'),
+  t('sdg.3'),
+  t('sdg.4'),
+  t('sdg.5'),
+  t('sdg.6'),
+  t('sdg.7'),
+  t('sdg.8'),
+  t('sdg.9'),
+  t('sdg.10'),
+  t('sdg.11'),
+  t('sdg.12'),
+  t('sdg.13'),
+  t('sdg.14'),
+  t('sdg.15'),
+  t('sdg.16'),
+  t('sdg.17'),
 ]
 
 const countryDataByOdd = ref({})
@@ -79,6 +87,28 @@ const generateMockData = () => {
   }
 
   return mockData
+}
+
+const updateTitleLanguage = () => {
+  oddTitles = [
+    t('sdg.1'),
+    t('sdg.2'),
+    t('sdg.3'),
+    t('sdg.4'),
+    t('sdg.5'),
+    t('sdg.6'),
+    t('sdg.7'),
+    t('sdg.8'),
+    t('sdg.9'),
+    t('sdg.10'),
+    t('sdg.11'),
+    t('sdg.12'),
+    t('sdg.13'),
+    t('sdg.14'),
+    t('sdg.15'),
+    t('sdg.16'),
+    t('sdg.17'),
+  ]
 }
 
 // const dataFromAPI = async () => {
@@ -116,16 +146,15 @@ const selectODD = (oddId) => {
 }
 
 const updateMapColors = () => {
-  console.log('Selected Goals : ' + selectedGoals.value)
   if (!countries) return
 
   let singleGoal = null
   let multipleGoals = []
 
-  if (selectedGoals.value.length === 1) {
-    singleGoal = selectedGoals.value[0] // ID ODD
-  } else if (selectedGoals.value.length > 1) {
-    multipleGoals = selectedGoals.value // IDs ODD
+  if (props.selectedGoals.length === 1) {
+    singleGoal = props.selectedGoals[0] // ID ODD
+  } else if (props.selectedGoals.length > 1) {
+    multipleGoals = props.selectedGoals // IDs ODD
   }
 
   countries
@@ -167,6 +196,21 @@ const updateMapColors = () => {
         return '#b7b7b7'
       }
     })
+}
+
+const updateLegendTitle = () => {
+  if (props.selectedGoals.length >= 2) {
+    if (props.selectedGoals.length == 18) {
+      selectedODDTitle.value = t('explore.legendTitle.all')
+    } else {
+      selectedODDTitle.value =
+        props.selectedGoals.length + ' ' + t('explore.legendTitle.moreSelected')
+    }
+  } else if (props.selectedGoals.length == 1) {
+    selectedODDTitle.value = oddTitles[props.selectedGoals[0]]
+  } else {
+    selectedODDTitle.value = t('explore.legendTitle.noSelected')
+  }
 }
 
 const createMap = async () => {
@@ -309,13 +353,15 @@ const createMap = async () => {
   }
 }
 
-const getSelectedODD = () => {
-  return selectedODD.value
-}
-
-// watch(selectedGoals, () => {
-//   updateMapColors();
-// });
+watch(
+  () => props.selectedGoals,
+  () => {
+    updateMapColors()
+    updateLegendTitle()
+    updateTitleLanguage()
+  },
+  { deep: true, immediate: true }, // optionnel, selon ton besoin
+)
 
 onMounted(() => {
   createMap()
@@ -325,43 +371,6 @@ onMounted(() => {
     createMap()
   })
 })
-
-const getSdgImage = (n) => {
-  // Cas particulier : image du bouton "Select All"
-  // if (n === 18) return new URL(`../assets/SDG/Français/select_all.png`, import.meta.url).href
-
-  if (language.locale.value === 'fr') {
-    return new URL(`../../assets/images/SDG/French/sdg_${n}.png`, import.meta.url).href
-  } else if (language.locale.value === 'en') {
-    return new URL(`../../assets/images/SDG/English/sdg_${n}.png`, import.meta.url).href
-  } else {
-    return new URL(`../../assets/images/SDG/Deutsch/sdg_${n}.svg`, import.meta.url).href
-  }
-}
-
-const toggleSelection = (n) => {
-  if (n === 17) {
-    // "Select All" toggles all
-    if (selectedGoals.value.length < 17) {
-      selectedGoals.value = Array.from({ length: 17 }, (_, i) => i + 1)
-      updateMapColors()
-    } else {
-      selectedGoals.value = []
-      updateMapColors()
-    }
-  } else {
-    if (selectedGoals.value.includes(n)) {
-      selectedGoals.value = selectedGoals.value.filter((g) => g !== n)
-      updateMapColors()
-    } else {
-      selectedGoals.value.push(n)
-      updateMapColors()
-    }
-    console.log('Value 2 :    ' + selectedGoals.value)
-    console.log('Size 2 :    ' + selectedGoals.value.length)
-    console.log('Value 2 [0] :   ' + selectedGoals.value[0])
-  }
-}
 </script>
 
 <template>
@@ -370,11 +379,7 @@ const toggleSelection = (n) => {
       <div id="world-map"></div>
       <div class="legend">
         <div class="legend-title">
-          {{
-            selectedODD
-              ? `ODD #${selectedODD}: ${oddTitles[selectedODD - 1]}`
-              : 'Sélectionnez un ODD'
-          }}
+          {{ selectedODDTitle }}
         </div>
         <div class="legend-scale">
           <div class="legend-item">
@@ -398,18 +403,6 @@ const toggleSelection = (n) => {
             <span>+1000</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="sdg-grid">
-      <div
-        v-for="n in 17"
-        :key="n"
-        class="sdg-item"
-        :class="{ selected: selectedGoals.includes(n) }"
-        @click="toggleSelection(n)"
-      >
-        <img :src="getSdgImage(n)" :alt="`ODD ${n}`" />
       </div>
     </div>
   </div>
