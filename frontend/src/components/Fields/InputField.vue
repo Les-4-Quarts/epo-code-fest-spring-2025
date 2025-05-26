@@ -83,6 +83,13 @@ const clearInput = () => {
   emit('deleteClick')
 }
 
+// Handle Enter key press
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    emit('iconClick')
+  }
+}
+
 const emit = defineEmits(['iconClick', 'deleteClick'])
 </script>
 
@@ -105,6 +112,7 @@ const emit = defineEmits(['iconClick', 'deleteClick'])
         :type="type"
         @focus="inputFocused = true"
         @blur="handleBlur"
+        @keydown="handleKeydown"
         :style="{
           width: `calc(${props.width} - ${props.iconSize * (iconPath ? 1 : 0)}px - ${props.iconSize * (deleteOption ? 1 : 0)}px)`,
         }"
