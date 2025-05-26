@@ -65,7 +65,8 @@ async function fetchPage(pageNumber: number) {
   } else {
     try {
       const response = await fetch(
-        `${base_api_url}/patents/search?query=${search.value} sdgs=${props.selectedSDGs.join(',')}&ops_search=${searchEspacenet.value}`,
+        // ${searchEspacenet.value || props.selectedSDGs.length === 0 ? '' : ` sdgs=${props.selectedSDGs.join(',')}`} => allows to search by SDGs only if Espacenet is not selected and at least one SDG is selected
+        `${base_api_url}/patents/search?query=${search.value}${searchEspacenet.value || props.selectedSDGs.length === 0 ? '' : ` sdgs=${props.selectedSDGs.join(',')}`}&ops_search=${searchEspacenet.value}`,
         {
           method: 'POST',
           headers: {
@@ -199,6 +200,15 @@ function analyze_patent(patent_number: string) {
 }
 
 const currentPatents = computed(() => patentsCache.value[page.value] || [])
+
+watch(
+  () => searchEspacenet.value,
+  () => {
+    page.value = 1
+    patentsCache.value = {}
+    fetchPage(1)
+  },
+)
 </script>
 
 <template>
