@@ -168,9 +168,6 @@ const updateMapColors = () => {
       let value = 0
 
       if (singleGoal) {
-        console.log('Single Goal : ' + singleGoal)
-        console.log('Country Code : ' + countryCode)
-
         const currentData = countryDataByOdd.value[singleGoal]
         value = currentData[countryCode] || 0
         const maxValue = Math.max(...Object.values(currentData))

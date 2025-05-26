@@ -28,7 +28,7 @@ const odds = ref([
   { id: 17, color: '#19486A' },
 ])
 
-const getSdgImage = (n) => {
+const getSdgImage = (n: number) => {
   if (language.locale.value === 'fr') {
     return new URL(`../../assets/images/SDG/French/sdg_${n}.png`, import.meta.url).href
   } else if (language.locale.value === 'en') {
@@ -38,7 +38,7 @@ const getSdgImage = (n) => {
   }
 }
 
-const toggleSelection = (n) => {
+const toggleSelection = (n: number) => {
   if (n === 18) {
     // "Select All" toggles all
     if (selectedGoals.value.length < 17) {
