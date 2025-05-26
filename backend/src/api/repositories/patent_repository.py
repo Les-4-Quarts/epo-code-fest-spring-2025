@@ -23,21 +23,17 @@ def create_patent(patent: dict):
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (number) DO NOTHING;
     """
-
     # Extract the title and abstract in different languages
-    title = patent.get("title", {})
-    abstract = patent.get("abstract", {})
-
     cursor.execute(insert_patent_query, (
         patent["number"],
-        title.get("en") if title.get("en") else None,
-        title.get("fr") if title.get("fr") else None,
-        title.get("de") if title.get("de") else None,
-        abstract.get("en") if abstract.get("en") else None,
-        abstract.get("fr") if abstract.get("fr") else None,
-        abstract.get("de") if abstract.get("de") else None,
+        patent["en_title"] if patent["en_title"] else None,
+        patent["fr_title"] if patent["fr_title"] else None,
+        patent["de_title"] if patent["de_title"] else None,
+        patent["en_abstract"] if patent["en_abstract"] else None,
+        patent["fr_abstract"] if patent["fr_abstract"] else None,
+        patent["de_abstract"] if patent["de_abstract"] else None,
         patent["country"],
-        patent["publicationDate"]
+        patent["publication_date"]
     ))
 
     # Insert claims into the patent_claim table
@@ -47,18 +43,10 @@ def create_patent(patent: dict):
         VALUES (%s, %s, %s)
         ON CONFLICT (claim_number, patent_number) DO NOTHING;
         """
-
-        # Claim example: "1. A method for processing..."
-
-        # Extract the claim number and text
-        claim_number = claim.split(".")[0].strip()
-        # Skip the number (one or two digits) and the dot
-        claim_text = claim[len(claim_number)+1:].strip()
-
         cursor.execute(insert_claim_query, (
-            int(claim_number),
-            patent["number"],
-            claim_text
+            claim["claim_number"],
+            claim["patent_number"],
+            claim["claim_text"]
         ))
 
     # Insert description into the patent_description table
@@ -68,23 +56,10 @@ def create_patent(patent: dict):
         VALUES (%s, %s, %s)
         ON CONFLICT (description_number, patent_number) DO NOTHING;
         """
-
-        # Description example: "TECHNICAL FIELD",
-        # Description example: "[0001]    The disclosure relates to the..."
-
-        # Extract the claim number and text. We want only descriptions starting with [xxxx].
-
-        if not description.startswith("["):
-            continue
-
-        # Skip the [ and the last ]
-        description_number = description[1:5].strip()
-        description_text = description[6:].strip()
-
         cursor.execute(insert_description_query, (
-            int(description_number),
-            patent["number"],
-            description_text
+            description["description_number"],
+            description["patent_number"],
+            description["description_text"]
         ))
 
     conn.commit()
@@ -99,7 +74,7 @@ def create_patent(patent: dict):
 
         cursor.execute(insert_applicant_query, (
             applicant["name"],
-            patent["number"]
+            applicant["patent_number"]
         ))
     conn.commit()
     cursor.close()
@@ -656,13 +631,33 @@ def search_patents(text: str = None, patent_number: str = None, publication_date
     base_query += " ORDER BY patent.publication_date DESC, patent.number ASC LIMIT %s OFFSET %s;"
     params.extend([last - first, first])
 
+    # Get total count of patents matching the search criteria
+    count_query = """
+    SELECT COUNT(*)
+    FROM patent
+    """
+    if conditions:
+        count_query += " WHERE " + " AND ".join(conditions)
+    cursor.execute(count_query, params[:-2])  # Exclude pagination params
+    total_patents = cursor.fetchone()[0]
+    logger.debug(f"Total patents matching criteria: {total_patents}")
+    if total_patents == 0:
+        logger.debug("No patents found matching the search criteria.")
+        return {
+            "patents": [],
+            "total_count": 0,
+            "first": first,
+            "last": last,
+            "total_results": 0
+        }
+    logger.debug(f"Executing search query with params: {params}")
+
     # Execute the query
     cursor.execute(base_query, params)
     results = cursor.fetchall()
     cursor.close()
     if not results:
         logger.debug("No patents found matching the search criteria.")
-        print(applicant is None)
         return {
             "patents": [],
             "total_count": 0,
@@ -719,11 +714,12 @@ def search_patents(text: str = None, patent_number: str = None, publication_date
     # Close the database connection
     conn.close()
     logger.debug("Patent search completed successfully")
+
     return {
         "patents": patents,
-        "total_count": len(patents),
+        "total_count": total_patents,
         "first": first,
-        "last": min(last, len(patents)),
+        "last": min(last, total_patents),
         "total_results": len(patents)
     }
 
@@ -843,7 +839,7 @@ if __name__ == "__main__":
 
     # Test search functionality
     search_results = search_patents(
-        text="mobile device with user activated")
+        sdgs=["SDG1"])
 
     for patent in search_results["patents"]:
         pprint(patent)

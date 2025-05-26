@@ -82,7 +82,8 @@ class FullPatent(Patent):
                         {
                             "patent_number": "EP0000000",
                             "sdg": "SDG 1: No Poverty",
-                            "sdg_description": "This patent relates to..."
+                            "sdg_reason": "This patent contributes to poverty reduction by...",
+                            "sdg_details": "This patent addresses the needs of low-income communities by providing...",
                         }
                     ]
                 }

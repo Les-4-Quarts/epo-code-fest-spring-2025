@@ -1,5 +1,6 @@
 from io import BytesIO
 import re
+from api.services import ops_service
 from fastapi import UploadFile
 from api.repositories import patent_repository, sdg_summary_repository
 from api.models.Patent import Patent, FullPatent, PatentList
@@ -9,7 +10,7 @@ from ai.models.classify_patent import Classify_patent
 
 
 from api.config.ai_config import ai_client, ai_model, prompt_name
-
+from api.config.ops_config import ops_api_url, ops_consumer_key, ops_consumer_secret_key
 
 from pdf2image import convert_from_bytes
 from PyPDF2 import PdfReader
@@ -141,7 +142,7 @@ def get_all_patents_by_applicant(applicant_name: str, first: int = 0, last: int 
     return []
 
 
-def search_patents(query: str, first: int = 0, last: int = 99) -> PatentList:
+def search_patents(query: str, first: int = 0, last: int = 99, ops_search: bool = False) -> PatentList:
     """
     Search for patents based on a query string.
 
@@ -149,14 +150,29 @@ def search_patents(query: str, first: int = 0, last: int = 99) -> PatentList:
         query (str): The search query string in CQL format.
         first (int): The index of the first patent to retrieve.
         last (int): The index of the last patent to retrieve.
+        ops_search (bool): Also search in the European Patent Office (EPO) database.
 
     Returns:
         PatentList: A list of patents matching the search query.
     """
     logger.debug(f"Searching patents with query: {query}")
 
+    if ops_search:
+        logger.debug("Searching patents in the OPS database.")
+        # Call the OPS service to search patents
+        patents_data = ops_service.get_patents(
+            ops_api_url, ops_consumer_key, ops_consumer_secret_key, query, first+1, last)
+
+        if patents_data:
+            return patents_data
+
+        logger.warning("No patents found in the OPS database.")
+        return []
+
     # Parse the query to ensure it is in the correct format
     args = parse_cql_to_args(query)
+
+    print(f"Parsed arguments: {args}")
 
     # Call the repository function to search patents
     patents_data = patent_repository.search_patents(
@@ -207,7 +223,9 @@ def parse_cql_to_args(cql_query: str) -> dict:
         "publication_date": "publication_date",
         "country": "country",
         "applicant": "applicant",
-        "sdg": "sdgs"
+        "sdgs": "sdgs",
+        "pn": "patent_number",  # Abbreviation for patent_number
+        "pd": "publication_date"  # Abbreviation for publication_date
     }
 
     # Initialize the arguments dictionary
@@ -221,9 +239,25 @@ def parse_cql_to_args(cql_query: str) -> dict:
                 # Handle multiple SDGs (split by "OR")
                 if args[python_key] is None:
                     args[python_key] = []
-                args[python_key].extend(value.split(" OR "))
+                args[python_key].extend([sdg.strip()
+                                        for sdg in value.split(" OR ")])
             else:
                 args[python_key] = value
+
+    # Ensure sdgs is always a list, even if no matches are found
+    if args["sdgs"] is None:
+        args["sdgs"] = []
+
+    # Handle cases where no explicit key-value pairs are provided
+    if not matches:
+        # Detect full or partial patent number formats
+        # e.g., EP0000000, EP0000000A1
+        if re.match(r'^[A-Z]{2}\d{7}[A-Z0-9]*$', cql_query):
+            args["patent_number"] = cql_query
+        elif re.match(r'^[A-Z]{2}\d+$', cql_query):  # e.g., EP1 (partial number)
+            args["patent_number"] = cql_query
+        else:
+            args["text"] = cql_query  # Default to text search
 
     # Log the parsed arguments
     logger.debug(f"Parsed arguments: {args}")
@@ -386,6 +420,17 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
     patent_text = ""
     patent = get_full_patent_by_number(patent_number)
 
+    # If the patent is not found in our database, dowload it from OPS API
+    if not patent:
+        logger.info(
+            f"Patent {patent_number} not found in the database, downloading from OPS API.")
+        patent = ops_service.get_full_patent(
+            ops_api_url, ops_consumer_key, ops_consumer_secret_key, patent_number)
+        if not patent:
+            logger.error(f"Failed to download patent {patent_number}.")
+            return []
+        patent_repository.create_patent(patent.model_dump())
+
     if patent.fr_abstract:
         patent_text += f"{patent.fr_abstract}\n"
     if patent.en_abstract:
@@ -394,7 +439,7 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
         patent_text += f"{patent.de_abstract}\n"
 
     for desc in patent.description:
-        patent_text += f"{desc["description_number"]}: {desc["description_text"]}\n"
+        patent_text += f"{desc.description_number}: {desc.description_text}\n"
 
     patent_text = " ".join(patent_text.split()[:3000])
 
@@ -405,17 +450,16 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
 
     sdg_summary = []
     for sdg in sdgs:
-        sdg_summary.append(
-            {
-                "patent_number": patent_number,
-                "sdg": sdg,
-                "sdg_reason": reason,
-                "sdg_details": "tqt ca arrive fort"  # TODO
-            }
-        )
+        sdg_summary_detail = {
+            "patent_number": patent_number,
+            "sdg": sdg,
+            "sdg_reason": reason,
+            "sdg_details": "tqt ca arrive fort"  # TODO
+        }
+        sdg_summary.append(sdg_summary_detail)
+        sdg_summary_repository.create_sdg_summary(sdg_summary_detail)
 
     if sdg_summary:
-        sdg_summary_repository.create_sdg_summary(sdg_summary)
         return [SDGSummary(**summary) for summary in sdg_summary]
 
     logger.warning("No analysis results found.")

@@ -80,14 +80,31 @@ const handleBlur = () => {
 const clearInput = () => {
   model.value = ''
   inputRef.value?.focus() // Refocus the input
+  emit('deleteClick')
 }
+
+// Handle Enter key press
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    emit('iconClick')
+  }
+}
+
+const emit = defineEmits(['iconClick', 'deleteClick'])
 </script>
 
 <template>
   <div>
     <label>{{ label }}</label>
     <div class="input">
-      <SvgIcon v-if="iconPath" :path="iconPath" type="mdi" class="input-icon" :size="iconSize" />
+      <SvgIcon
+        v-if="iconPath"
+        :path="iconPath"
+        type="mdi"
+        class="input-icon"
+        :size="iconSize"
+        @click="$emit('iconClick')"
+      />
       <input
         ref="inputRef"
         v-model="model"
@@ -95,6 +112,7 @@ const clearInput = () => {
         :type="type"
         @focus="inputFocused = true"
         @blur="handleBlur"
+        @keydown="handleKeydown"
         :style="{
           width: `calc(${props.width} - ${props.iconSize * (iconPath ? 1 : 0)}px - ${props.iconSize * (deleteOption ? 1 : 0)}px)`,
         }"
@@ -136,6 +154,7 @@ div {
     input {
       background-color: transparent;
       border: none;
+      color: var(--neutral-hightest);
 
       &:focus {
         outline: none;
@@ -146,6 +165,7 @@ div {
     .input-icon {
       margin-right: 5px;
       color: var(--neutral);
+      cursor: pointer;
     }
     .close-icon {
       cursor: pointer;

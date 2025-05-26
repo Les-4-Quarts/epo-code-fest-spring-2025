@@ -143,6 +143,7 @@ async def get_all_patents_by_applicant(
 @router.post("/search", response_model=PatentList)
 async def search_patents(
     query: str,
+    ops_search: bool = False,
     range_header: str = Header(default="0-99", alias="Range")
 ) -> PatentList:
     """
@@ -150,6 +151,7 @@ async def search_patents(
 
     Args:
         query (str): The search query string.
+        ops_search (bool): Also search in the European Patent Office (EPO) database.
         range_header (str): The range of patents to retrieve (e.g., "0-99"). The range cannot exceed 100 patents.
 
     Returns:
@@ -172,7 +174,7 @@ async def search_patents(
         )
 
     # Call the service function to search patents
-    patents = patent_service.search_patents(query, first, last)
+    patents = patent_service.search_patents(query, first, last, ops_search)
 
     if not patents:
         logger.warning("No patents found for the search query.")
