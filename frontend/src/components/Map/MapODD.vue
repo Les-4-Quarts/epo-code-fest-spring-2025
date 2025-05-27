@@ -10,7 +10,6 @@ import type { Stats } from '@/types/Stats'
 
 const base_api_url = import.meta.env.VITE_BASE_API_URL
 const { t } = useI18n()
-const selectedSdg = ref<number | null>(null)
 const selectedSdgTitle = ref('All selected')
 const selectedColor = ref('#cccccc')
 const statsData = ref<Stats | null>(null)
@@ -142,18 +141,6 @@ const updateTitleLanguage = () => {
     t('sdg.16'),
     t('sdg.17'),
   ]
-}
-
-// Function to select an SDG
-const selectSDG = (sdgId: number | null) => {
-  selectedSdg.value = sdgId
-  if (sdgId) {
-    const selectedSdg = odds.value.find((odd) => odd.id === sdgId)
-    selectedColor.value = selectedSdg ? selectedSdg.color : '#cccccc'
-  } else {
-    selectedColor.value = '#cccccc'
-  }
-  updateMapColors()
 }
 
 const updateMapColors = () => {
@@ -307,24 +294,47 @@ const createMap = async () => {
               .scale(Math.min(8, 0.9 / Math.max((x1 - x0) / width, (y1 - y0) / height)))
               .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
           )
-        const countryCodeNum = (d as { id: number | undefined }).id
-        const countryCode2 = ISONumtoISO2(countryCodeNum)
-        const countryCode3 = ISONumtoISO3(countryCodeNum)
-        const countryName = (d as unknown as { properties: { name: string } }).properties.name
-        const sdgId = selectedSdg.value
-        const count =
-          sdgId && countryDataByOdd.value && countryDataByOdd.value[sdgId]
-            ? countryDataByOdd.value[sdgId] || 0
-            : 0
+        countries
+          .on('mouseover', function (event, d) {
+            const countryCode = (d as { id: number | undefined }).id
+              ? ISONumtoISO3((d as { id: number | undefined }).id)
+              : null
 
-        emit('country-selected', {
-          codeNum: countryCodeNum,
-          code2: countryCode2,
-          code3: countryCode3,
-          name: countryName,
-          sdgId: sdgId,
-          count: count,
-        })
+            if (!countryCode) return
+
+            console.log('countryCode', countryCode)
+            console.log('countryDataByOdd', countryDataByOdd.value)
+
+            const count = Object.values(countryDataByOdd.value).reduce(
+              (acc, stats) => acc + (stats[ISO3toISO2(countryCode)] || 0),
+              0,
+            )
+
+            const tooltip = document.getElementById('tooltip')
+            if (tooltip) {
+              tooltip.style.display = 'block'
+              tooltip.innerHTML = `<strong>${countryCode}</strong>: ${count} patents`
+            }
+          })
+          .on('mousemove', function (event) {
+            const tooltip = document.getElementById('tooltip')
+            if (tooltip) {
+              const tooltipWidth = tooltip.offsetWidth
+              const tooltipHeight = tooltip.offsetHeight
+
+              const x = Math.min(event.pageX + 10, window.innerWidth - tooltipWidth - 10)
+              const y = Math.min(event.pageY + 10, window.innerHeight - tooltipHeight - 10)
+
+              tooltip.style.left = `${x - 280}px`
+              tooltip.style.top = `${y - 20}px`
+            }
+          })
+          .on('mouseout', function () {
+            const tooltip = document.getElementById('tooltip')
+            if (tooltip) {
+              tooltip.style.display = 'none'
+            }
+          })
       })
 
     g.selectAll('text')
@@ -383,8 +393,6 @@ const createMap = async () => {
             .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
         )
     }
-
-    selectSDG(2)
   } catch (error) {
     console.error('Erreur lors du chargement des données de la carte:', error)
   }
@@ -423,6 +431,7 @@ const maxPatents = computed(() => {
   <div class="map-and-sdg-container">
     <div class="map-container">
       <div id="world-map"></div>
+      <div id="tooltip" class="tooltip" style="display: none"></div>
       <div class="legend">
         <div class="legend-title">
           {{ selectedSdgTitle }}
@@ -472,6 +481,18 @@ const maxPatents = computed(() => {
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 20px;
+}
+
+.tooltip {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  z-index: 10;
 }
 
 #world-map {
