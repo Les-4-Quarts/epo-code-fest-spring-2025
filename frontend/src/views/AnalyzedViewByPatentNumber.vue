@@ -103,7 +103,9 @@ const country_flag = computed(() => {
 // Methods
 const renderMarkdown = (markdown: string | undefined) => {
   if (!markdown) return ''
-  return marked(markdown, { breaks: true })
+  const formattedMarkdown = markdown.replace(/\\n/g, '\n')
+  console.log('Formatted Markdown:', formattedMarkdown)
+  return marked(formattedMarkdown, { breaks: true })
 }
 
 function backResults() {
@@ -204,8 +206,8 @@ function cssvar(name: string) {
                 :bgColor="`var(--${sdgSelected.slice(0, 3).toLowerCase()}-${sdgSelected.slice(3)})`"
               />
             </div>
-            <div v-for="(result, index) in filteredResults" :key="index">
-              <div v-html="renderMarkdown(result.sdg_details)"></div>
+            <div v-for="(result, index) in filteredResults" :key="index" class="result-explanation">
+              <div class="markdown-content" v-html="renderMarkdown(result.sdg_details)"></div>
             </div>
           </div>
         </div>
@@ -215,6 +217,11 @@ function cssvar(name: string) {
 </template>
 
 <style lang="scss" scoped>
+::v-deep(.markdown-content) {
+  p {
+    margin-bottom: 30px !important;
+  }
+}
 .analyze {
   display: flex;
   justify-content: center;

@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { computed, onMounted, ref, watch } from 'vue'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
-import { ISONumtoISO2, ISONumtoISO3, ISO3toISO2 } from 'country-code-switch'
+import { ISONumtoISO3, ISO3toISO2 } from 'country-code-switch'
 import type { Objects, Topology } from 'topojson-specification'
 import type { GeoJsonProperties } from 'geojson'
 import type { Stats } from '@/types/Stats'
@@ -146,7 +146,6 @@ const updateTitleLanguage = () => {
 const updateMapColors = () => {
   if (!countries) return
 
-  console.log(selectedGoals.value)
   const filteredSelectedGoals = selectedGoals.value.filter((goal) => goal !== 18)
 
   let singleGoal = null
