@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Loaders/DotLoader",
     component: DotLoader,
+    tags: ["autodocs"],
     argTypes: {},
     parameters: {
         backgrounds: {

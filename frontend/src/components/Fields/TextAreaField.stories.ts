@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Fields/TextAreaField",
     component: TextAreaField,
+    tags: ["autodocs"],
     argTypes: {
         label: {
             description: "The label displayed above the text area.",
