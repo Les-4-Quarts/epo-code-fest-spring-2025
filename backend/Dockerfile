@@ -12,7 +12,7 @@ COPY . .
 RUN pip install poetry && poetry install --only main
 
 # Install PyTesseract
-RUN apt-get update && apt-get install -y tesseract-ocr libtesseract-dev
+RUN apt-get update && apt-get install -y tesseract-ocr libtesseract-dev poppler-utils
 
 # Run the application
 CMD ["poetry", "run", "start"]

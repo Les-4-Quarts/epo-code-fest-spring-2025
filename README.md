@@ -45,9 +45,10 @@ To deploy the application in a production environment, follow these steps:
 3. Download the `db.sql` file from this Dropbox [link]().
 
 4. Feed the database with the SQL file.
-```bash
-docker exec -i postgres psql -U user -d cep < {path-to-your-file}/db.sql
-```
+   ```bash
+   docker exec -i postgres psql -U user -d cep < {path-to-your-file}/db.sql
+   ```
+5. Visit the application in your browser at [`http://localhost:5173`](http://localhost:5173).
 
 ---
 
@@ -140,7 +141,12 @@ cd backend
 poetry install
 ```
 
-Create `config.yaml` file copy from `config-example-dev.yaml` and fill in the values.
+You may have to install `poppler-utils` to use the `pdf2image` library. Normally, it is already installed on most systems, but if you encounter issues, you can install it using:
+```bash
+sudo apt-get install poppler-utils
+```
+
+3. Create `config.yaml` file copy from `config-example-dev.yaml` and fill in the values.
 ```bash
 cd backend
 cp config-example-dev.yaml src/api/config/config.yaml
