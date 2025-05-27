@@ -31,46 +31,58 @@ class CitationPatent():
         self.client: Any = client
         self.temperature: float = temperature
         self.max_tokens: int = max_tokens
+    
 
     def _get_citation_explanation(self, text: str) -> Tuple[str, str]:
         """
-        Extracts citation and explanation content from a raw text response.
-
+        Extracts <summary> elements and <citation><explanation> pairs from text.
+        
         The method assumes the input text contains XML-like tags `<citation>`
         and `<explanation>` delimiting the relevant content. It also expects
         a `</think>` tag preceding the main content.
 
         Args:
-            text (str): The raw text string containing the citation and explanation.
-
+            text: The text to analyze
+            
         Returns:
-            Tuple[str, str]: A tuple containing the extracted citation string
-                             and explanation string. If a tag is not found,
-                             the corresponding string will be empty.
+            Tuple containing (summary_content, formatted_citations_explanations)
         """
-        # Assumes the relevant part of the text starts after "</think>"
-        try:
-            text_after_think: str = text.split("</think>", 1)[1]
-        except IndexError:
-            # Handle cases where "</think>" is not present
-            logger.warning(
-                "The '</think>' tag was not found in the response. Processing the entire text.")
-            text_after_think = text
-
-        citation_match: re.Match[str] | None = re.search(
-            r'<citation>(.*?)</citation>', text_after_think, re.DOTALL)
-        explanation_match: re.Match[str] | None = re.search(
-            r'<explanation>(.*?)</explanation>', text_after_think, re.DOTALL)
-
-        citation_content_regex: str = ""
-        explanation_content_regex: str = ""
-
-        if citation_match:
-            citation_content_regex = citation_match.group(1).strip()
-
-        if explanation_match:
-            explanation_content_regex = explanation_match.group(1).strip()
-        return citation_content_regex, explanation_content_regex
+        # Remove the part before </think> if it exists
+        if "</think>" in text:
+            text = text.split("</think>", 1)[1]
+        
+        # Extract summary if it exists
+        summary_match = re.search(r'<summary>\s*(.*?)\s*</summary>', text, re.DOTALL)
+        summary_content = summary_match.group(1).strip() if summary_match else ""
+        
+        # Extract all citation/explanation pairs
+        citation_explanation_pairs = []
+        
+        # Find all citations
+        citation_matches = re.finditer(r'<citation>\s*(.*?)\s*</citation>', text, re.DOTALL)
+        
+        for citation_match in citation_matches:
+            citation_content = citation_match.group(1).strip()
+            citation_end = citation_match.end()
+            
+            # Look for the explanation that immediately follows this citation
+            remaining_text = text[citation_end:]
+            explanation_match = re.search(r'^\s*<explanation>\s*(.*?)\s*</explanation>', remaining_text, re.DOTALL)
+            
+            if explanation_match:
+                explanation_content = explanation_match.group(1).strip()
+                citation_explanation_pairs.append((citation_content, explanation_content))
+        
+        # Format the citation/explanation pairs
+        formatted_pairs = []
+        for i, (citation, explanation) in enumerate(citation_explanation_pairs, 1):
+            formatted_pair = f"**Citation {i}:**\n{citation}\n**Explanation {i}:**\n{explanation}"
+            formatted_pairs.append(formatted_pair)
+        
+        formatted_citations_explanations = "\n\n".join(formatted_pairs)
+        
+        return summary_content, formatted_citations_explanations
+    
 
     def generate_response(self, patent_text: str, sdg: str, reason: str) -> Tuple[str, str]:
         """
@@ -88,28 +100,36 @@ class CitationPatent():
             Tuple[str, str]: A tuple containing the generated citation string
                              and explanation string.
         """
-        formatted_prompt: str = sdg_citation_prompt(patent_text, sdg, reason)
-        # Assuming self.client.generate returns a dictionary-like object
-        # with a 'response' key, or a string directly.
-        output: Any = self.client.generate(
-            model=self.model_name,
-            prompt=formatted_prompt,
-            options={"temperature": self.temperature,
-                     "max_tokens": self.max_tokens}
-        )
-        # Handle different possible output types from self.client.generate
-        response: str
-        if isinstance(output, dict):
-            response = output.get('response', '').strip()
-        elif isinstance(output, str):
-            response = output.strip()
-        else:
-            # Fallback for unexpected output types
-            logger.warning(
-                f"Unexpected output type from LLM client: {type(output)}. Converting to string.")
-            response = str(output).strip()
 
-        return self._get_citation_explanation(response)
+        if sdg != "None":
+            formatted_prompt: str = sdg_citation_prompt(patent_text, sdg)
+            # Assuming self.client.generate returns a dictionary-like object
+            # with a 'response' key, or a string directly.
+            output: Any = self.client.generate(
+                model=self.model_name,
+                prompt=formatted_prompt,
+                options={"temperature": self.temperature,
+                        "max_tokens": self.max_tokens}
+            )
+            # Handle different possible output types from self.client.generate
+            response: str
+            if isinstance(output, dict):
+                response = output.get('response', '').strip()
+            elif isinstance(output, str):
+                response = output.strip()
+            else:
+                # Fallback for unexpected output types
+                logger.warning(
+                    f"Unexpected output type from LLM client: {type(output)}. Converting to string.")
+                response = str(output).strip()
+            
+            citation_content, explanation_content = self._get_citation_explanation(response)
+
+        # If not a SDG the previous model already made an explanation
+        else:
+            citation_content, explanation_content = "", reason
+
+        return citation_content, explanation_content
 
     # Modified to return str for citation_content based on _get_citation_explanation
     def citation(self, patent_text: str, sdg: str, reason: str) -> Tuple[str, str]:
