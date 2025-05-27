@@ -4,17 +4,15 @@ ops:
   ops_api_url: https://ops.epo.org/3.2
 
 database:
-  host: localhost
+  host: postgres
   port: "5432"
   name: cep
   user: user
   password: password
 
 ai:
-  host: localhost:11434
-  model: "qwen2.5:1.5b"
-  huggingface_token: <YOUR_HUGGINGFACE_TOKEN>
+  host: ollama:11434
+  model: "qwen3:14b"
   
-
 logging:
   level: INFO

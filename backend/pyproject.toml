@@ -3,9 +3,11 @@ name = "cep"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "RolletQuentin",email = "rolletquen@gmail.com"}
+    {name = "Quentin Rollet",email = "rolletquen@gmail.com"},
+    {name = "Patrice Soulier",email = "patrice.soulier.pro@gmail.com"},
+    {name = "Matt Coste",email = "mc.mattcoste@gmail.com"},
+    {name = "Marc-Antoine Vergnet"}
 ]
-readme = "README.md"
 requires-python = ">=3.13, <4.0"
 dependencies = [
     "fastapi[standard] (>=0.115.12,<0.116.0)",

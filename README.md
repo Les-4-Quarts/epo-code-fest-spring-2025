@@ -1,14 +1,124 @@
-# epo-code-fest-spring-2025
+# CEP: Compass for European Patents
 
-[toc]: # (TOC)
+Welcome to the repository for **CEP (Compass for European Patents)**, our proposal for CodeFest 2025. CEP is a full-stack application designed to analyze patent data and map it to the **United Nations Sustainable Development Goals (SDGs)**.
 
-## Prod
+![Webview screenshot](./assets/webview.png)
 
-## Dev
+---
 
-### Setup
+## Table of Contents
 
-#### Install Poetry
+- [CEP: Compass for European Patents](#cep-compass-for-european-patents)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Production Setup](#production-setup)
+  - [Development Setup](#development-setup)
+    - [Prerequisites](#prerequisites)
+    - [Running Docker Containers](#running-docker-containers)
+    - [Feed the Database](#feed-the-database)
+    - [Install Tesseract](#install-tesseract)
+    - [Frontend Setup](#frontend-setup)
+    - [Backend Setup](#backend-setup)
+
+---
+
+## Overview
+
+CEP leverages advanced data analysis techniques to provide insights into how patents contribute to achieving SDGs. The application is built with a modern tech stack, including **Docker**, **Python**, **Node.js**, and **Poetry**, ensuring scalability and ease of development.
+
+---
+
+## Production Setup
+
+To deploy the application in a production environment, follow these steps:
+
+1. Copy the example configuration file and update it with your credentials:
+   ```bash
+   cp backend/config-example.yaml backend/src/api/config/config.yaml
+   ```
+   - Provide your **Consumer Key** and **Consumer Secret** for the OPS API in the `config.yaml` file.
+
+2. Start the application using Docker Compose:
+   ```bash
+   docker compose up -d
+   ```
+3. Download the `db.sql` file from this Dropbox [link]().
+
+4. Feed the database with the SQL file.
+```bash
+docker exec -i postgres psql -U user -d cep < {path-to-your-file}/db.sql
+```
+
+---
+
+## Development Setup
+
+### Prerequisites
+
+Ensure the following tools are installed on your system:
+
+- **Docker**
+- **Docker Compose**
+- **Python 3.13+**
+- **Poetry** (Python dependency management)
+- **Node.js** (for the frontend)
+- **npm** (Node.js package manager)
+
+### Running Docker Containers
+
+Start the required services (e.g., `ollama` and `postgres`) using Docker Compose:
+
+```bash
+docker compose up ollama postgres -d
+```
+
+### Feed the Database
+
+To initialize the database, follow these steps:
+1. Download the `db.sql` file from this Dropbox [link]().
+
+2. Feed the database with the SQL file.
+```bash
+docker exec -i postgres psql -U user -d cep < {path-to-your-file}/db.sql
+```
+
+### Install Tesseract
+
+To use Tesseract for OCR, install it on your system. For example, on Ubuntu, you can run:
+
+```bash
+sudo apt-get install tesseract-ocr
+```
+
+On Arch Linux, use:
+
+```bash
+sudo pacman -S python-pytesseract
+```
+
+If you want more information about the installation, refer to the [Tesseract Installation Guide](https://github.com/madmaze/pytesseract)
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+```bash
+cd frontend
+```
+2. Install the required Node.js packages:
+```bash
+npm install
+```
+3. Copy `.env.example` to `.env` and fill in the required values:
+```bash
+cp .env.example .env
+```
+4. Start the frontend development server:
+```bash
+npm run dev
+```
+5. Open your browser and navigate to `http://localhost:5173` to view the application.
+
+### Backend Setup
 
 Make sure to install Poetry and Python 3.13+.
 
@@ -29,36 +139,16 @@ poetry --version
 cd backend
 poetry install
 ```
-To use a GPU, install the correct version of [pytorch](https://pytorch.org/get-started/locally/).
-```
-poetry run pip install [specific version for your gpu]
-```
 
-#### Run ollama with docker
-```bash
-docker compose up ollama -d
-```
-
-#### Feed the database
-
-Create the database with Docker:
-```bash
-docker compose up postgres -d
-```
-
-Create `config.yaml` file copy from `config-example.yaml` and fill in the values.
+Create `config.yaml` file copy from `config-example-dev.yaml` and fill in the values.
 ```bash
 cd backend
-cp src/api/config/config-example.yaml src/api/config/config.yaml
-```
-Add your huggingface_token in the config.yaml.
-
-:warning: This will drop all existing data in the database. :warning:
-```bash
-poetry run python3 -m src.api.init_db
+cp config-example-dev.yaml src/api/config/config.yaml
 ```
 
-Download the `db.sql` file. Then run the `psql` command to import the data into the database:
+Normally, you should replace \<postgres host\> and \<ollama host\> with `localhost` if you are running the containers locally.
+
+4. Run the backend server:
 ```bash
-docker exec -i postgres psql -U user -d cep < {path-to-your-file}/db.sql
+poetry run dev
 ```

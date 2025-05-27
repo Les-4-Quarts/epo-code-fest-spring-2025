@@ -1,0 +1,18 @@
+ops:
+  consumer_key: <YOUR_CONSUMER_KEY>
+  consumer_secret_key: <YOUR_CONSUMER_SECRET_KEY>
+  ops_api_url: https://ops.epo.org/3.2
+
+database:
+  host: <postgres host>
+  port: "5432"
+  name: cep
+  user: user
+  password: password
+
+ai:
+  host: <ollama host>:11434
+  model: "qwen3:14b"
+  
+logging:
+  level: INFO
