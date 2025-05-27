@@ -119,6 +119,11 @@ npm run dev
 ```
 5. Open your browser and navigate to `http://localhost:5173` to view the application.
 
+6. You can run Storybook for UI component documentation and testing:
+```bash
+npm run storybook
+```
+
 ### Backend Setup
 
 Make sure to install Poetry and Python 3.13+.
