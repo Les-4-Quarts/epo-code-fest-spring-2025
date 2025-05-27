@@ -53,12 +53,6 @@ defineProps({
         :is-active="activeTab === 'explore'"
         :to="{ name: 'explore' }"
       />
-      <BigButton
-        :text="$t('panel.search-applicant')"
-        icon="mdiBriefcaseSearchOutline"
-        :is-active="activeTab === 'applicant'"
-        :to="{ name: 'applicant' }"
-      />
     </div>
     <div class="footer">
       <SelectInput
@@ -101,7 +95,10 @@ defineProps({
   padding: var(--vertical-padding) var(--horizontal-padding);
   left: calc(-1 * var(--width)); /* Hidden by default */
   transform: translateX(0);
-  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  transition:
+    transform 0.3s ease-in-out,
+    background-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
   z-index: 1000;
 
   transition:

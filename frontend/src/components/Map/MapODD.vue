@@ -1,23 +1,25 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
-import { ISONumtoISO2, ISONumtoISO3 } from 'country-code-switch'
+import { ISONumtoISO2, ISONumtoISO3, ISO3toISO2 } from 'country-code-switch'
 import type { Objects, Topology } from 'topojson-specification'
 import type { GeoJsonProperties } from 'geojson'
+import type { Stats } from '@/types/Stats'
 
 const base_api_url = import.meta.env.VITE_BASE_API_URL
 const { t } = useI18n()
-const selectedODD = ref<number | null>(null)
-const selectedODDTitle = ref('All selected')
+const selectedSdg = ref<number | null>(null)
+const selectedSdgTitle = ref('All selected')
 const selectedColor = ref('#cccccc')
-// const selectedGoals = ref([])
+const statsData = ref<Stats | null>(null)
+const selectedGoals = ref<number[]>([])
 
 const props = defineProps({
   selectedGoals: {
-    type: Array,
-    default: () => ref([]),
+    type: Array as () => number[],
+    default: () => ref<number[]>([]),
   },
 })
 
@@ -63,6 +65,53 @@ let oddTitles = [
 
 const countryDataByOdd = ref<Record<number, Record<string, number>>>({})
 
+async function getPatentStats(selectedGoals: number[]) {
+  fetch(
+    `${base_api_url}/patents/stats?sdgs=${selectedGoals.filter((n: number) => n != 18).join(',')}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      return response.json()
+    })
+    .then((data: Stats) => {
+      statsData.value = data
+      countryDataByOdd.value = data.stats || {}
+      updateMapColors()
+    })
+    .catch((error) => {
+      console.error('There was a problem with the fetch operation:', error)
+    })
+}
+getPatentStats(props.selectedGoals)
+
+watch(
+  () => props.selectedGoals,
+  (newSelectedGoals) => {
+    selectedGoals.value = newSelectedGoals
+  },
+  { immediate: true, deep: true }, // Watch for changes in the array
+)
+
+watch(
+  () => selectedGoals.value,
+  (newSelectedGoals) => {
+    if (newSelectedGoals.length > 0) {
+      getPatentStats(newSelectedGoals)
+    } else {
+      statsData.value = null
+    }
+  },
+  { deep: true }, // Watch for changes in the array
+)
+
 let svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>,
   g: d3.Selection<SVGGElement, unknown, HTMLElement, any>,
   path: d3.GeoPath<any, d3.GeoPermissibleObjects> | null = null,
@@ -72,29 +121,6 @@ let svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>,
 const emit = defineEmits(['country-selected', 'update-selection'])
 let currentTransform = d3.zoomIdentity
 let countries: d3.Selection<SVGPathElement, d3.GeoPermissibleObjects, SVGGElement, unknown>
-
-const generateMockData = () => {
-  const mockData: Record<number, Record<string, number>> = {}
-  for (let i = 1; i <= 18; i++) {
-    mockData[i] = {}
-
-    mockData[i]['FRA'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['DEU'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['ESP'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['ITA'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['GBR'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['PRT'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['BEL'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['NLD'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['CHE'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['AUT'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['USA'] = 150
-    mockData[i]['AFG'] = Math.floor(Math.random() * 100) + 20
-    mockData[i]['ARG'] = Math.floor(Math.random() * 100) + 20
-  }
-
-  return mockData
-}
 
 const updateTitleLanguage = () => {
   oddTitles = [
@@ -118,12 +144,12 @@ const updateTitleLanguage = () => {
   ]
 }
 
-// Fonction pour sélectionner un ODD
-const selectODD = (oddId: number | null) => {
-  selectedODD.value = oddId
-  if (oddId) {
-    const selectedOdd = odds.value.find((odd) => odd.id === oddId)
-    selectedColor.value = selectedOdd ? selectedOdd.color : '#cccccc'
+// Function to select an SDG
+const selectSDG = (sdgId: number | null) => {
+  selectedSdg.value = sdgId
+  if (sdgId) {
+    const selectedSdg = odds.value.find((odd) => odd.id === sdgId)
+    selectedColor.value = selectedSdg ? selectedSdg.color : '#cccccc'
   } else {
     selectedColor.value = '#cccccc'
   }
@@ -133,49 +159,51 @@ const selectODD = (oddId: number | null) => {
 const updateMapColors = () => {
   if (!countries) return
 
+  console.log(selectedGoals.value)
+  const filteredSelectedGoals = selectedGoals.value.filter((goal) => goal !== 18)
+
   let singleGoal = null
   let multipleGoals: any[] = []
 
-  if (props.selectedGoals.length === 1) {
-    singleGoal = props.selectedGoals[0] // ID ODD
-  } else if (props.selectedGoals.length > 1) {
-    multipleGoals = props.selectedGoals // IDs ODD
+  if (filteredSelectedGoals.length === 1) {
+    singleGoal = filteredSelectedGoals[0] // ID ODD
+  } else if (filteredSelectedGoals.length > 1) {
+    multipleGoals = filteredSelectedGoals // IDs ODD
   }
 
   countries
     .transition()
     .duration(500)
     .attr('fill', (d) => {
-      const countryCode =
-        (d as { id: number | undefined }).id !== undefined
-          ? ISONumtoISO3((d as { id: number | undefined }).id)
-          : null
+      const countryCode = (d as { id: number | undefined }).id
+        ? ISONumtoISO3((d as { id: number | undefined }).id)
+        : null
 
       if (!countryCode) return '#b7b7b7'
 
       let value = 0
 
       if (singleGoal) {
-        const currentData = countryDataByOdd.value[singleGoal as number]
-        value = currentData[countryCode] || 0
+        const currentData = countryDataByOdd.value?.[singleGoal as number] || {}
+        value = currentData[ISO3toISO2(countryCode)] || 0
         const maxValue = Math.max(...Object.values(currentData as Record<string, number>))
-        const intensity = value / maxValue
+        const intensity = maxValue > 0 ? value / maxValue : 0
         const selectedOdd = odds.value.find((odd) => odd.id === singleGoal)
         selectedColor.value = selectedOdd ? selectedOdd.color : '#cccccc'
         return d3.interpolate('#b7b7b7', selectedColor.value)(intensity)
       } else if (multipleGoals.length > 1) {
         let totalValues: Record<string, any> = {}
         multipleGoals.forEach((goalId) => {
-          const data = countryDataByOdd.value[goalId]
-          if (data && data[countryCode]) {
-            value += data[countryCode]
+          const data = countryDataByOdd.value?.[goalId] || {}
+          if (data && data[ISO3toISO2(countryCode)]) {
+            value += data[ISO3toISO2(countryCode)]
           }
           for (const code in data) {
             totalValues[code] = (totalValues[code] || 0) + data[code]
           }
         })
         const maxValue = Math.max(...Object.values(totalValues))
-        const intensity = value / maxValue
+        const intensity = maxValue > 0 ? value / maxValue : 0
         selectedColor.value = '#6F0474'
         return d3.interpolate('#b7b7b7', selectedColor.value)(intensity)
       } else {
@@ -187,15 +215,15 @@ const updateMapColors = () => {
 const updateLegendTitle = () => {
   if (props.selectedGoals.length >= 2) {
     if (props.selectedGoals.length == 18) {
-      selectedODDTitle.value = t('explore.legendTitle.all')
+      selectedSdgTitle.value = t('explore.legendTitle.all')
     } else {
-      selectedODDTitle.value =
+      selectedSdgTitle.value =
         props.selectedGoals.length + ' ' + t('explore.legendTitle.moreSelected')
     }
   } else if (props.selectedGoals.length == 1) {
-    selectedODDTitle.value = oddTitles[props.selectedGoals[0] as number]
+    selectedSdgTitle.value = oddTitles[props.selectedGoals[0] as number]
   } else {
-    selectedODDTitle.value = t('explore.legendTitle.noSelected')
+    selectedSdgTitle.value = t('explore.legendTitle.noSelected')
   }
 }
 
@@ -283,15 +311,18 @@ const createMap = async () => {
         const countryCode2 = ISONumtoISO2(countryCodeNum)
         const countryCode3 = ISONumtoISO3(countryCodeNum)
         const countryName = (d as unknown as { properties: { name: string } }).properties.name
-        const oddId = selectedODD.value
-        const count = oddId ? countryDataByOdd.value[oddId] || 0 : 0
+        const sdgId = selectedSdg.value
+        const count =
+          sdgId && countryDataByOdd.value && countryDataByOdd.value[sdgId]
+            ? countryDataByOdd.value[sdgId] || 0
+            : 0
 
         emit('country-selected', {
           codeNum: countryCodeNum,
           code2: countryCode2,
           code3: countryCode3,
           name: countryName,
-          oddId: oddId,
+          sdgId: sdgId,
           count: count,
         })
       })
@@ -321,9 +352,6 @@ const createMap = async () => {
           d3.zoomIdentity,
         )
     })
-
-    countryDataByOdd.value = generateMockData()
-    // countryDataByOdd.value = dataFromAPI();
 
     updateMapColors()
 
@@ -356,7 +384,7 @@ const createMap = async () => {
         )
     }
 
-    selectODD(2)
+    selectSDG(2)
   } catch (error) {
     console.error('Erreur lors du chargement des données de la carte:', error)
   }
@@ -380,6 +408,15 @@ onMounted(() => {
     createMap()
   })
 })
+
+const maxPatents = computed(() => {
+  if (!statsData.value || !statsData.value.stats) return 0
+
+  // Trouver le maximum de brevets pour un pays
+  return Math.max(
+    ...Object.values(statsData.value.stats).flatMap((countryStats) => Object.values(countryStats)),
+  )
+})
 </script>
 
 <template>
@@ -388,28 +425,28 @@ onMounted(() => {
       <div id="world-map"></div>
       <div class="legend">
         <div class="legend-title">
-          {{ selectedODDTitle }}
+          {{ selectedSdgTitle }}
         </div>
-        <div class="legend-scale">
+        <div class="legend-scale" v-if="statsData">
           <div class="legend-item">
             <div class="legend-color" :style="{ backgroundColor: '#b7b7b7' }"></div>
             <span>0</span>
           </div>
           <div class="legend-item">
             <div class="legend-color" :style="{ backgroundColor: selectedColor + '50' }"></div>
-            <span>1-50</span>
+            <span>1-{{ Math.floor(maxPatents / 4) }}</span>
           </div>
           <div class="legend-item">
             <div class="legend-color" :style="{ backgroundColor: selectedColor + '70' }"></div>
-            <span>50-500</span>
+            <span>{{ Math.floor(maxPatents / 4) + 1 }}-{{ Math.floor(maxPatents / 2) }}</span>
           </div>
           <div class="legend-item">
             <div class="legend-color" :style="{ backgroundColor: selectedColor + '99' }"></div>
-            <span>500-1000</span>
+            <span>{{ Math.floor(maxPatents / 2) + 1 }}-{{ Math.floor(maxPatents - 1) }}</span>
           </div>
           <div class="legend-item">
             <div class="legend-color" :style="{ backgroundColor: selectedColor }"></div>
-            <span>+1000</span>
+            <span>{{ Math.floor(maxPatents) }}</span>
           </div>
         </div>
       </div>
