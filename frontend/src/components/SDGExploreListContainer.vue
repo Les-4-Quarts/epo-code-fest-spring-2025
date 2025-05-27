@@ -8,6 +8,9 @@ import SpinnerLoader from './Loaders/SpinnerLoader.vue'
 import ItemList from './Lists/ItemList.vue'
 import BasicButton from './Buttons/BasicButton.vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
 
 const props = defineProps({
   selectedSDGs: {
@@ -232,7 +235,7 @@ watch(
         <div class="search">
           <InputField
             class="search-input"
-            placeholder="Search by name or code"
+            :placeholder="t('search.placeholder')"
             type="text"
             v-model="search"
             icon="mdiMagnify"
@@ -263,7 +266,7 @@ watch(
             id="searchEspacenet"
             v-model="searchEspacenet"
           />
-          <label for="search-espacenet">Search with Espacenet</label>
+          <label for="search-espacenet">{{ $t('search.espacenet') }}</label>
         </div>
       </div>
 
@@ -271,16 +274,19 @@ watch(
         <ItemList
           v-for="patent in currentPatents"
           :key="patent.number"
-          :title="patent.en_title"
+          :title="
+            locale === 'fr' ? patent.fr_title : locale === 'de' ? patent.de_title : patent.en_title
+          "
           :sdgs="patent.sdgs"
           :button="
             patent.is_analyzed
               ? {
                   icon: 'mdiChevronRight',
+                  color: 'var(--neutral-hightest)',
                   action: () => {},
                 }
               : {
-                  text: 'Start analysis',
+                  text: t('analyze.button'),
                   color: 'var(--neutral-lowest)',
                   bgColor: 'var(--primary-highter)',
                   action: () => {
