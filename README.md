@@ -76,7 +76,7 @@ docker compose up ollama postgres -d
 ### Feed the Database
 
 To initialize the database, follow these steps:
-1. Download the `db.sql` file from this Dropbox [link]().
+1. Download the `db.sql` file from this Dropbox [link](https://www.dropbox.com/scl/fi/hx14qzlyu6eijn286udzx/db.sql?rlkey=399xtryml3r40e5ez3x6z1alh&st=fnj4ti5q&dl=0).
 
 2. Feed the database with the SQL file.
 ```bash
