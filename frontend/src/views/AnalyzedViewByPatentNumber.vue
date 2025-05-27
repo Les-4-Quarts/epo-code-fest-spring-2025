@@ -205,9 +205,7 @@ function cssvar(name: string) {
               />
             </div>
             <div v-for="(result, index) in filteredResults" :key="index">
-              <p>
-                {{ result.sdg_details }}
-              </p>
+              <div v-html="renderMarkdown(result.sdg_details)"></div>
             </div>
           </div>
         </div>
