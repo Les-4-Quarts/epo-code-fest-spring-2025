@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Boxes/BasicBoxes",
     component: BasicBox,
+    tags: ["autodocs"],
     argTypes: {
         title: { control: "text", description: "The title of the box" },
         color: { control: "color", description: "The color of the box" },

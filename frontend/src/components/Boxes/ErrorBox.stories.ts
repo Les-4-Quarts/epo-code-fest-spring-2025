@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Boxes/BasicBoxes",
     component: ErrorBox,
+    tags: ["autodocs"],
     argTypes: {},
     parameters: {
         backgrounds: {

@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Chips/BasicChip",
     component: BasicChip,
+    tags: ["autodocs"],
     argTypes: {
         title: { control: "text", description: "The title of the chip" },
         color: { control: "color", description: "The text color of the chip" },

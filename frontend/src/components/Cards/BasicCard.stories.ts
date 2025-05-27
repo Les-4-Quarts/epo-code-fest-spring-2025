@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Cards/BasicCard",
     component: BasicCard,
+    tags: ["autodocs"],
     argTypes: {
         title: {
             description: "The title displayed at the top of the card.",

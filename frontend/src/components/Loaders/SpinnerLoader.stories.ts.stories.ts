@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Loaders/SpinnerLoader",
     component: SpinnerLoader,
+    tags: ["autodocs"],
     argTypes: {
         color: { control: "color", description: "The color of the spinner" },
         size: { control: "number", description: "The size of the spinner" },

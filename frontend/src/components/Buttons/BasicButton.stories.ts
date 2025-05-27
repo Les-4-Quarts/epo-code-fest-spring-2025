@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 export default {
     title: "Components/Buttons/BasicButton",
     component: BasicButton,
+    tags: ["autodocs"],
     argTypes: {
         text: {
             description: "The text to display on the button.",
