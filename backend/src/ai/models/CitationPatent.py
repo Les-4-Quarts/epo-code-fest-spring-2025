@@ -72,7 +72,7 @@ class CitationPatent():
             explanation_content_regex = explanation_match.group(1).strip()
         return citation_content_regex, explanation_content_regex
 
-    def generate_response(self, patent_text: str, sdg: str) -> Tuple[str, str]:
+    def generate_response(self, patent_text: str, sdg: str, reason: str) -> Tuple[str, str]:
         """
         Generates a citation and explanation for a given patent text and SDG.
 
@@ -88,7 +88,7 @@ class CitationPatent():
             Tuple[str, str]: A tuple containing the generated citation string
                              and explanation string.
         """
-        formatted_prompt: str = sdg_citation_prompt(patent_text, sdg)
+        formatted_prompt: str = sdg_citation_prompt(patent_text, sdg, reason)
         # Assuming self.client.generate returns a dictionary-like object
         # with a 'response' key, or a string directly.
         output: Any = self.client.generate(
@@ -112,7 +112,7 @@ class CitationPatent():
         return self._get_citation_explanation(response)
 
     # Modified to return str for citation_content based on _get_citation_explanation
-    def citation(self, patent_text: str, sdg: str) -> Tuple[str, str]:
+    def citation(self, patent_text: str, sdg: str, reason: str) -> Tuple[str, str]:
         """
         Provides a citation and explanation for a patent concerning a specific SDG.
 
@@ -133,7 +133,7 @@ class CitationPatent():
         citation_content: str
         explanation_content: str
         citation_content, explanation_content = self.generate_response(
-            patent_text, sdg)
+            patent_text, sdg, reason)
         logger.debug(f"Citation: {citation_content}")
         logger.debug(f"Explanation: {explanation_content}")
 

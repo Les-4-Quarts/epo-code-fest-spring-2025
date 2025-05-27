@@ -19,8 +19,29 @@ sdg_description = {
     "SDG17": """**SDG 17: Partnerships for the Goals**: Strengthen the means of implementation and revitalize the global partnership for sustainable development.\nTarget 17.1 – Strengthen domestic resource mobilization\n*Example innovations*:\nTax collection and compliance software\nFinancial management platforms for governments\nBlockchain for transparent public finances\nTarget 17.2 – Implement effective development assistance and financial flows\n*Example innovations*:\nInternational aid tracking platforms\nAutomated donor reporting systems\nFinancial transaction monitoring for aid effectiveness\nTarget 17.3 – Mobilize additional financial resources for developing countries\n*Example innovations*:\nCrowdfunding platforms for development projects\nImpact investment analytics tools\nBlended finance management software\nTarget 17.4 – Assist developing countries in debt sustainability\n*Example innovations*:\nDebt management and restructuring tools\nFinancial risk assessment platforms\nPredictive analytics for debt repayment capacity\nTarget 17.5 – Promote technology facilitation and cooperation\n*Example innovations*:\nOpen innovation platforms\nInternational patent-sharing databases\nCollaborative R\&D management systems\nTarget 17.6 – Enhance knowledge sharing on sustainable development policies\n*Example innovations*:\nOnline policy knowledge hubs\nData analytics platforms for SDG monitoring\nVirtual conferences and collaboration tools\nTarget 17.7 – Promote sustainable technology development and diffusion\n*Example innovations*:\nTechnology transfer platforms\nGreen technology incubation programs\nOpen-source sustainable tech repositories\nTarget 17.8 – Fully operationalize the global partnership for sustainable development\n*Example innovations*:\nIntegrated SDG monitoring dashboards\nMulti-stakeholder engagement platforms\nCross-sectoral data interoperability standards\nTarget 17.9 – Support capacity-building in developing countries\n*Example innovations*:\nE-learning platforms for sustainable development skills\nRemote technical assistance tools\nTraining management systems\nTarget 17.10 – Promote a universal, rules-based, open, non-discriminatory trading system\n*Example innovations*:\nTrade compliance and monitoring software\nAutomated tariff and trade barrier analysis tools\nDigital trade facilitation platforms\nTarget 17.11 – Increase exports from developing countries\n*Example innovations*:\nMarket access information systems\nExport logistics optimization tools\nTrade finance platforms\nTarget 17.12 – Realize timely implementation of duty-free and quota-free market access\n*Example innovations*:\nCustoms clearance automation systems\nTrade preference management software\nSupply chain transparency platforms\nTarget 17.13 – Enhance global macroeconomic stability\n*Example innovations*:\nEconomic forecasting models\nFinancial stability monitoring systems\nCrisis simulation tools\nTarget 17.14 – Enhance policy coherence for sustainable development\n*Example innovations*:\nIntegrated policy management platforms\nCross-sectoral impact assessment tools\nMulti-stakeholder consultation platforms\nTarget 17.15 – Respect each country’s policy space and leadership\n*Example innovations*:\nSovereignty-respecting data-sharing frameworks\nCustomizable policy simulation tools\nNational SDG progress tracking systems"""
 }
 
+sdg_name = {
+    "SDG1": """**SDG 1: No Poverty:**""",
+    "SDG2": """**SDG 2: Zero Hunger:**""",
+    "SDG3": """**SDG 3: Good Health and Well-being:**""",
+    "SDG4": """**SDG 4: Quality Education:**""",
+    "SDG5": """**SDG 5: Gender Equality:**""",
+    "SDG6": """**SDG 6: Clean Water and Sanitation:**""",
+    "SDG7": """**SDG 7: Affordable and Clean Energy:**""",
+    "SDG8": """**SDG 8: Decent Work and Economic Growth:**""",
+    "SDG9": """**SDG 9: Industry, Innovation and Infrastructure:**""",
+    "SDG10": """**SDG 10: Reduced Inequalities:**""",
+    "SDG11": """**SDG 11: Sustainable Cities and Communities:**""",
+    "SDG12": """**SDG 12: Responsible Consumption and Production:**""",
+    "SDG13": """**SDG 13: Climate Action:**""",
+    "SDG14": """**SDG 14: Life Below Water:**""",
+    "SDG15": """**SDG 15: Life on Land:**""",
+    "SDG16": """**SDG 16: Peace, Justice and Strong Institutions**""",
+    "SDG17": """**SDG 17: Partnerships for the Goals**"""
 
-def sdg_citation_prompt(text, sdg):
+}
+
+
+def sdg_citation_prompt(text, sdg, reason):
 
     prompt = f"""You are an AI assistant specializing in citation and analysis.
 
@@ -30,6 +51,8 @@ def sdg_citation_prompt(text, sdg):
 
     The text to analyze is:
     [{text}]
+    {reason}
 
+    YOU NEED TO SPEAK EXPLICITLY ABOUT THE {sdg_name[sdg]} IN THE EXPLANATION
     Please Providing your exact citation from the text and explanation in the specified format. The citation and the explanation are enclosed within `<citation> </citation>` and `<explanation> </explanation>` tags, respectively."""
     return prompt
