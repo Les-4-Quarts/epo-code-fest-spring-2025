@@ -19,6 +19,7 @@ const props = defineProps({
       icon?: string
       color?: string
       bgColor?: string
+      isLoading?: boolean
       action?: () => void
     }>,
   },
@@ -58,6 +59,7 @@ const props = defineProps({
         :iconSize="64"
         :color="button.color"
         :bgColor="button.bgColor"
+        :is-loading="button.isLoading"
         @click="button.action"
       />
     </div>

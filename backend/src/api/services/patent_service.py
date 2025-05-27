@@ -397,7 +397,7 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
         patent_text += f"{patent.de_abstract}\n"
 
     for desc in patent.description:
-        patent_text += f"{desc["description_number"]}: {desc["description_text"]}\n"
+        patent_text += f"{desc.description_number}: {desc.description_text}\n"
 
     patent_text = " ".join(patent_text.split()[:3000])
 

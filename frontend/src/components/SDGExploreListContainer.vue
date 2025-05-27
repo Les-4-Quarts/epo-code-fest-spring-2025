@@ -27,6 +27,7 @@ const searchEspacenet = defineModel('searchEspacenet', {
 
 const base_api_url = import.meta.env.VITE_BASE_API_URL
 const isLoading = ref(false)
+const isLoadingAnalysis = ref<string | null>(null)
 
 const patentsCache = ref<Record<number, Patent[]>>({}) // Dictionnaire pour stocker les pages préchargées
 const page = ref(1)
@@ -74,7 +75,6 @@ async function preloadPages() {
   // Load the first 5 pages if they are not already loaded
   for (let i = 1; i <= Math.min(5, totalPages.value); i++) {
     if (!patentsCache.value[i]) {
-      console.log('Preloading page:', i)
       pagesToLoad.push(i)
     }
   }
@@ -82,7 +82,6 @@ async function preloadPages() {
   // Load the last 5 pages if they are not already loaded
   for (let i = Math.max(1, totalPages.value - 4); i <= totalPages.value; i++) {
     if (!patentsCache.value[i]) {
-      console.log('Preloading page:', i)
       pagesToLoad.push(i)
     }
   }
@@ -90,7 +89,6 @@ async function preloadPages() {
   // Load the pages around the current page if they are not already loaded
   for (let i = start; i <= end; i++) {
     if (!patentsCache.value[i]) {
-      console.log('Preloading page:', i)
       pagesToLoad.push(i)
     }
   }
@@ -142,9 +140,38 @@ watch(
       await fetchPage(newPage)
     }
     await preloadPages()
-    console.log('Loaded pages:', Object.keys(patentsCache.value))
   },
 )
+
+function analyze_patent(patent_number: string) {
+  if (isLoadingAnalysis.value) {
+    console.warn('Analysis already in progress, please wait.')
+    return
+  }
+  isLoadingAnalysis.value = patent_number
+  fetch(`${base_api_url}/patents/analyze/${patent_number}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Error analyzing patent ${patent_number}: ${response.statusText}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log('Analysis result:', data)
+      // Handle the analysis result as needed
+    })
+    .catch((error) => {
+      console.error('Error during patent analysis:', error)
+    })
+    .finally(() => {
+      isLoadingAnalysis.value = null
+    })
+}
 
 const currentPatents = computed(() => patentsCache.value[page.value] || [])
 </script>
@@ -196,6 +223,10 @@ const currentPatents = computed(() => patentsCache.value[page.value] || [])
                   text: 'Start analysis',
                   color: 'var(--neutral-lowest)',
                   bgColor: 'var(--primary-highter)',
+                  action: () => {
+                    analyze_patent(patent.number)
+                  },
+                  isLoading: isLoadingAnalysis === patent.number,
                 }
           "
           :action="
