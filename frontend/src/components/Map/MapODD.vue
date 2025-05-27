@@ -302,9 +302,6 @@ const createMap = async () => {
 
             if (!countryCode) return
 
-            console.log('countryCode', countryCode)
-            console.log('countryDataByOdd', countryDataByOdd.value)
-
             const count = Object.values(countryDataByOdd.value).reduce(
               (acc, stats) => acc + (stats[ISO3toISO2(countryCode)] || 0),
               0,
@@ -319,14 +316,11 @@ const createMap = async () => {
           .on('mousemove', function (event) {
             const tooltip = document.getElementById('tooltip')
             if (tooltip) {
-              const tooltipWidth = tooltip.offsetWidth
-              const tooltipHeight = tooltip.offsetHeight
+              const x = event.clientX || 0
+              const y = event.clientY || 0
 
-              const x = Math.min(event.pageX + 10, window.innerWidth - tooltipWidth - 10)
-              const y = Math.min(event.pageY + 10, window.innerHeight - tooltipHeight - 10)
-
-              tooltip.style.left = `${x - 280}px`
-              tooltip.style.top = `${y - 20}px`
+              tooltip.style.left = `${x + 20}px`
+              tooltip.style.top = `${y + 20}px`
             }
           })
           .on('mouseout', function () {
@@ -484,7 +478,7 @@ const maxPatents = computed(() => {
 }
 
 .tooltip {
-  position: absolute;
+  position: fixed;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 4px;
