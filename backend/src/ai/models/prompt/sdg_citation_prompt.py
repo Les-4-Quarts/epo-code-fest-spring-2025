@@ -19,17 +19,86 @@ sdg_description = {
     "SDG17": """**SDG 17: Partnerships for the Goals**: Strengthen the means of implementation and revitalize the global partnership for sustainable development.\nTarget 17.1 – Strengthen domestic resource mobilization\n*Example innovations*:\nTax collection and compliance software\nFinancial management platforms for governments\nBlockchain for transparent public finances\nTarget 17.2 – Implement effective development assistance and financial flows\n*Example innovations*:\nInternational aid tracking platforms\nAutomated donor reporting systems\nFinancial transaction monitoring for aid effectiveness\nTarget 17.3 – Mobilize additional financial resources for developing countries\n*Example innovations*:\nCrowdfunding platforms for development projects\nImpact investment analytics tools\nBlended finance management software\nTarget 17.4 – Assist developing countries in debt sustainability\n*Example innovations*:\nDebt management and restructuring tools\nFinancial risk assessment platforms\nPredictive analytics for debt repayment capacity\nTarget 17.5 – Promote technology facilitation and cooperation\n*Example innovations*:\nOpen innovation platforms\nInternational patent-sharing databases\nCollaborative R\&D management systems\nTarget 17.6 – Enhance knowledge sharing on sustainable development policies\n*Example innovations*:\nOnline policy knowledge hubs\nData analytics platforms for SDG monitoring\nVirtual conferences and collaboration tools\nTarget 17.7 – Promote sustainable technology development and diffusion\n*Example innovations*:\nTechnology transfer platforms\nGreen technology incubation programs\nOpen-source sustainable tech repositories\nTarget 17.8 – Fully operationalize the global partnership for sustainable development\n*Example innovations*:\nIntegrated SDG monitoring dashboards\nMulti-stakeholder engagement platforms\nCross-sectoral data interoperability standards\nTarget 17.9 – Support capacity-building in developing countries\n*Example innovations*:\nE-learning platforms for sustainable development skills\nRemote technical assistance tools\nTraining management systems\nTarget 17.10 – Promote a universal, rules-based, open, non-discriminatory trading system\n*Example innovations*:\nTrade compliance and monitoring software\nAutomated tariff and trade barrier analysis tools\nDigital trade facilitation platforms\nTarget 17.11 – Increase exports from developing countries\n*Example innovations*:\nMarket access information systems\nExport logistics optimization tools\nTrade finance platforms\nTarget 17.12 – Realize timely implementation of duty-free and quota-free market access\n*Example innovations*:\nCustoms clearance automation systems\nTrade preference management software\nSupply chain transparency platforms\nTarget 17.13 – Enhance global macroeconomic stability\n*Example innovations*:\nEconomic forecasting models\nFinancial stability monitoring systems\nCrisis simulation tools\nTarget 17.14 – Enhance policy coherence for sustainable development\n*Example innovations*:\nIntegrated policy management platforms\nCross-sectoral impact assessment tools\nMulti-stakeholder consultation platforms\nTarget 17.15 – Respect each country’s policy space and leadership\n*Example innovations*:\nSovereignty-respecting data-sharing frameworks\nCustomizable policy simulation tools\nNational SDG progress tracking systems"""
 }
 
+sdg_name = {
+    "SDG1": """**SDG 1: No Poverty:**""",
+    "SDG2": """**SDG 2: Zero Hunger:**""",
+    "SDG3": """**SDG 3: Good Health and Well-being:**""",
+    "SDG4": """**SDG 4: Quality Education:**""",
+    "SDG5": """**SDG 5: Gender Equality:**""",
+    "SDG6": """**SDG 6: Clean Water and Sanitation:**""",
+    "SDG7": """**SDG 7: Affordable and Clean Energy:**""",
+    "SDG8": """**SDG 8: Decent Work and Economic Growth:**""",
+    "SDG9": """**SDG 9: Industry, Innovation and Infrastructure:**""",
+    "SDG10": """**SDG 10: Reduced Inequalities:**""",
+    "SDG11": """**SDG 11: Sustainable Cities and Communities:**""",
+    "SDG12": """**SDG 12: Responsible Consumption and Production:**""",
+    "SDG13": """**SDG 13: Climate Action:**""",
+    "SDG14": """**SDG 14: Life Below Water:**""",
+    "SDG15": """**SDG 15: Life on Land:**""",
+    "SDG16": """**SDG 16: Peace, Justice and Strong Institutions**""",
+    "SDG17": """**SDG 17: Partnerships for the Goals**"""
+}
+
+sdg_short_description = {
+    "SDG1": """**SDG 1: No Poverty:** End poverty in all its forms everywhere.""",
+    "SDG2": """**SDG 2: Zero Hunger:** End hunger, achieve food security and improved nutrition and promote sustainable agriculture.""",
+    "SDG3": """**SDG 3: Good Health and Well-being:** Ensure healthy lives and promote well-being for all at all ages.""",
+    "SDG4": """**SDG 4: Quality Education:** Ensure inclusive and equitable quality education and promote lifelong learning opportunities for all.""",
+    "SDG5": """**SDG 5: Gender Equality:** Achieve gender equality and empower all women and girls.""",
+    "SDG6": """**SDG 6: Clean Water and Sanitation:** Ensure availability and sustainable management of water and sanitation for all.""",
+    "SDG7": """**SDG 7: Affordable and Clean Energy:** Ensure access to affordable, reliable, sustainable and modern energy for all.""",
+    "SDG8": """**SDG 8: Decent Work and Economic Growth:** Promote sustained, inclusive and sustainable economic growth, full and productive employment and decent work for all.""",
+    "SDG9": """**SDG 9: Industry, Innovation and Infrastructure:** Build resilient infrastructure, promote inclusive and sustainable industrialization and foster innovation.""",
+    "SDG10": """**SDG 10: Reduced Inequalities:** Reduce inequality within and among countries.""",
+    "SDG11": """**SDG 11: Sustainable Cities and Communities:** Make cities and human settlements inclusive, safe, resilient and sustainable.""",
+    "SDG12": """**SDG 12: Responsible Consumption and Production:** Ensure sustainable consumption and production patterns.""",
+    "SDG13": """**SDG 13: Climate Action:** Take urgent action to combat climate change and its impacts.""",
+    "SDG14": """**SDG 14: Life Below Water:** Conserve and sustainably use the oceans, seas and marine resources for sustainable development.""",
+    "SDG15": """**SDG 15: Life on Land:** Protect, restore and promote sustainable use of terrestrial ecosystems, sustainably manage forests, combat desertification, and halt and reverse land degradation and halt biodiversity loss.""",
+    "SDG16": """**SDG 16: Peace, Justice and Strong Institutions:** Promote peaceful and inclusive societies for sustainable development, provide access to justice for all and build effective, accountable and inclusive institutions at all levels.""",
+    "SDG17": """ **SDG 17: Partnerships for the Goals:** Strengthen the means of implementation and revitalize the global partnership for sustainable development.""",
+    "None": """**nothing:**  the text is not related to SDG"""
+}
+
+
 
 def sdg_citation_prompt(text, sdg):
 
-    prompt = f"""You are an AI assistant specializing in citation and analysis.
+    prompt = f"""You are an AI assistant specialized in Sustainable Development Goals (SDG) analysis. Your task is to justify precisely why a given text is related to a specific SDG.
 
-    Your task is to analyze the text and identify pertinent citations related to this Sustainable Development Goal (SDG) **{sdg_description[sdg]}**. You also need to add a short explanation about the link between the SDG and the citation. The citation and the explanation are enclosed within `<citation> </citation>` and `<explanation> </explanation>` tags, respectively.
+    ## CRITICAL INSTRUCTION: 
+    You MUST accept and work with the given SDG classification. Your role is NOT to evaluate or question whether the text might be better suited for another SDG. You must find and explain the connections between the text and the specified SDG only.
 
-    From the text, cite the exact phrases, sentences, or pertinent segments that directly relate to the provided **{sdg}**. Based on the cited segments, provide a short, clear explanation of why the text is classified under this specific SDG. Your explanation should explicitly link the citation text segments to the aspects of the SDG (e.g., its main goal, specific targets, or example innovations).
+    ## Instructions:
 
-    The text to analyze is:
-    [{text}]
+    1. **Analyze the provided context:**
+    - Text to analyze: <text>{text}</text>
+    - Target SDG: <sdg>{sdg_short_description[sdg]}</sdg>
 
-    Please Providing your exact citation from the text and explanation in the specified format. The citation and the explanation are enclosed within `<citation> </citation>` and `<explanation> </explanation>` tags, respectively."""
+    2. **Produce a structured analysis with exactly two parts:**
+
+    ### Part 1 - Summary of the relationship
+    Provide a summary explaining clearly and exclusively why this text is linked to the {sdg_short_description[sdg]}. You must focus exclusively on this SDG and never mention or suggest other SDGs, even if you think they might be more relevant.
+
+    Required format: <summary>YOUR_SUMMARY</summary>
+
+    ### Part 2 - Relevant citations
+    Identify and cite passages from the original text that demonstrate the link to the SDG. For each citation:
+    - Reproduce the text exactly without modification
+    - Include reference numbers [description number] if they exist
+    - Add an explanation of the relevance
+
+    Required format:
+    <citation>EXACT_TEXT_EXCERPT</citation>
+    <explanation>EXPLANATION_OF_RELEVANCE</explanation>
+
+    ## Quality criteria:
+    - Acceptance: Fully accept the given SDG classification without question
+    - Precision: Find direct and verifiable links to the specified SDG only
+    - Accuracy: Faithful citations from the original text
+    - Relevance: Exclusive focus on the specified SDG - do not mention other SDGs
+    - Clarity: Concise and understandable explanations
+
+    Begin your analysis now."""
+
     return prompt

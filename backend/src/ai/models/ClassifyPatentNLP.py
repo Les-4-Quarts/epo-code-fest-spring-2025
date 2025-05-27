@@ -1,17 +1,22 @@
-from ai.models.model_base import Model_base
 from typing import List, Optional
 from transformers import pipeline
 from api.config.ai_config import ai_huggingface_token
 
-
-class Model(Model_base):
+class ClassifyPatentNLP():
     """
     Example concrete implementation of Model_base.
     """
-    def __init__(self, ai_huggingface_token: str):
-        # Initialize the classifier once
-        self.classifier = pipeline(model="facebook/bart-large-mnli", token=ai_huggingface_token)
-
+    def __init__(self, ai_huggingface_token: str, model_name):
+        # Initialize the classifier once with explicit task specification
+        self.model_name = model_name
+        
+        # Specify the zero-shot classification task explicitly
+        self.classifier = pipeline(
+            task="zero-shot-classification",
+            model=model_name, 
+            token=ai_huggingface_token
+        )
+        
         # Define SDG label dictionary
         self.sdg_labels_dict = {
             "SDG1": "End poverty in all its forms everywhere", 
@@ -32,10 +37,9 @@ class Model(Model_base):
             "SDG16": "Promote peaceful and inclusive societies for sustainable development, provide access to justice for all and build effective, accountable and inclusive institutions at all levels", 
             "SDG17": "Strengthen the means of implementation and revitalize the Global Partnership for Sustainable Development"
         }
-
+        
         # Precompute candidate label values
         self.candidate_label_values = list(self.sdg_labels_dict.values())
-
 
     def get_sdg_code_from_label(self, label: str) -> str:
         """Reverse lookup SDG code from full label text."""
@@ -44,20 +48,23 @@ class Model(Model_base):
                 return code
         return "None"
 
-
-    def classify_description(self, description: str) -> str:
+    def classify_description(self, description: str, threshold=0.18) -> str:
         """
         Use the classifier to determine the most relevant SDG.
         """
-
         sdg_pred = "None"
-
-        # If desc size > 20 word
+        
+        # If desc size > 20 words
         if len(description.split()) > 20:
-            result = self.classifier(description, candidate_labels=self.candidate_label_values)
-            
-            if result["scores"][0] >= 0.18:
-                top_label = result["labels"][0]
-                sdg_pred = self.get_sdg_code_from_label(top_label)
-
+            try:
+                result = self.classifier(description, candidate_labels=self.candidate_label_values)
+                
+                if result["scores"][0] >= threshold:
+                    top_label = result["labels"][0]
+                    sdg_pred = self.get_sdg_code_from_label(top_label)
+            except Exception as e:
+                print(f"Error during classification: {e}")
+                print(f"Model: {self.model_name}")
+                sdg_pred = "Error"
+                
         return sdg_pred

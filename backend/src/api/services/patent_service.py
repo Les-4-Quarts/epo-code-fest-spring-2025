@@ -310,13 +310,14 @@ def analyze_patent_pdf(pdf_file: UploadFile) -> list[SDGSummary]:
 
     sdg_summary = []
     for sdg in sdgs:
-        sdg_reason, sdg_details = model_citation.citation(filtered_text, sdg)
+        summary_content, formatted_citations_explanations = model_citation.citation(
+            filtered_text, sdg, reason)
         sdg_summary.append(
             {
                 "patent_number": None,
                 "sdg": sdg,
-                "sdg_reason": sdg_reason,
-                "sdg_details": sdg_details
+                "sdg_reason": summary_content,
+                "sdg_details": formatted_citations_explanations
             }
         )
 
@@ -453,12 +454,13 @@ def analyze_patent_by_number(patent_number: str) -> list[SDGSummary]:
 
     sdg_summary = []
     for sdg in sdgs:
-        sdg_reason, sdg_details = model_citation.citation(patent_text, sdg)
+        summary_content, formatted_citations_explanations = model_citation.citation(
+            patent_text, sdg, reason)
         sdg_summary_detail = {
             "patent_number": patent_number,
             "sdg": sdg,
-            "sdg_reason": sdg_reason,
-            "sdg_details": sdg_details
+            "sdg_reason": summary_content,
+            "sdg_details": formatted_citations_explanations
         }
         sdg_summary.append(sdg_summary_detail)
         sdg_summary_repository.create_sdg_summary(sdg_summary_detail)
